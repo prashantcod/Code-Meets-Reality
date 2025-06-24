@@ -1,0 +1,1653 @@
+/**
+ * Concept Examples Module
+ * Provides example code for different programming concepts
+ * Version: 2.0
+ * Last updated: May 7, 2025
+ */
+
+// Initial debug message
+console.log("ConceptExamples.js module loaded");
+
+/**
+ * Get real-world examples for a given concept and language
+ * @param {string} concept - The programming concept
+ * @param {string} language - The programming language
+ * @returns {object} Real-world example with title, description and code
+ */
+export function getRealWorldExample(concept, language = 'python') {
+    const examples = {
+        'if-else': {
+            title: 'User Authentication System',
+            description: 'This login/signup system uses if-else statements to validate user credentials and handle different authentication scenarios.',
+            code: {
+                python: `# User Authentication System with if-else statements
+from flask import Flask, request, redirect, session
+
+app = Flask(__name__)
+app.secret_key = "your_secret_key"
+
+# Simple user database (in real world, this would be a database)
+users = {
+    "user@example.com": {"password": "securepass123", "name": "Test User"}
+}
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    error = None
+    
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+        
+        # Check if email exists
+        if email in users:
+            # Check if password matches
+            if password == users[email]["password"]:
+                # Authentication successful
+                session["user"] = email
+                return redirect("/dashboard")
+            else:
+                # Password incorrect
+                error = "Incorrect password"
+        else:
+            # Email not found
+            error = "Email not registered"
+    
+    # If GET request or authentication failed, show login form
+    return render_template("login.html", error=error)
+
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    error = None
+    
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+        confirm = request.form.get("confirm_password")
+        name = request.form.get("name")
+        
+        # Validate input fields
+        if not all([email, password, confirm, name]):
+            error = "All fields are required"
+        elif email in users:
+            error = "Email already registered"
+        elif password != confirm:
+            error = "Passwords do not match"
+        elif len(password) < 8:
+            error = "Password must be at least 8 characters"
+        else:
+            # Create new user
+            users[email] = {"password": password, "name": name}
+            session["user"] = email
+            return redirect("/dashboard")
+    
+    # If GET request or validation failed, show signup form
+    return render_template("signup.html", error=error)`,
+                
+                javascript: `// User Authentication System with if-else statements
+const express = require('express');
+const app = express();
+const session = require('express-session');
+
+app.use(express.urlencoded({ extended: true }));
+app.use(session({
+  secret: 'your_secret_key',
+  resave: false,
+  saveUninitialized: true
+}));
+
+// Simple user database (in real world, this would be a database)
+const users = {
+  "user@example.com": { password: "securepass123", name: "Test User" }
+};
+
+app.post('/login', (req, res) => {
+  const { email, password } = req.body;
+  let error = null;
+  
+  // Check if email exists
+  if (email in users) {
+    // Check if password matches
+    if (password === users[email].password) {
+      // Authentication successful
+      req.session.user = email;
+      return res.redirect('/dashboard');
+    } else {
+      // Password incorrect
+      error = "Incorrect password";
+    }
+  } else {
+    // Email not found
+    error = "Email not registered";
+  }
+  
+  // Authentication failed, show login form with error
+  res.render('login', { error });
+});
+
+app.post('/signup', (req, res) => {
+  const { email, password, confirm_password, name } = req.body;
+  let error = null;
+  
+  // Validate input fields
+  if (!email || !password || !confirm_password || !name) {
+    error = "All fields are required";
+  } else if (email in users) {
+    error = "Email already registered";
+  } else if (password !== confirm_password) {
+    error = "Passwords do not match";
+  } else if (password.length < 8) {
+    error = "Password must be at least 8 characters";
+  } else {
+    // Create new user
+    users[email] = { password, name };
+    req.session.user = email;
+    return res.redirect('/dashboard');
+  }
+  
+  // Validation failed, show signup form with error
+  res.render('signup', { error });
+});`
+            },
+            demo_html: `
+<div class="auth-demo">
+  <div class="auth-container">
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="login">Login</button>
+      <button class="auth-tab" data-tab="signup">Sign Up</button>
+    </div>
+    
+    <div class="auth-form login-form active">
+      <h2>Login</h2>
+      <div class="form-group">
+        <label for="login-email">Email:</label>
+        <input type="email" id="login-email" placeholder="Enter your email">
+      </div>
+      <div class="form-group">
+        <label for="login-password">Password:</label>
+        <input type="password" id="login-password" placeholder="Enter your password">
+      </div>
+      <div class="error-message" id="login-error"></div>
+      <button class="submit-btn" id="login-btn">Login</button>
+    </div>
+    
+    <div class="auth-form signup-form">
+      <h2>Create Account</h2>
+      <div class="form-group">
+        <label for="signup-name">Full Name:</label>
+        <input type="text" id="signup-name" placeholder="Enter your name">
+      </div>
+      <div class="form-group">
+        <label for="signup-email">Email:</label>
+        <input type="email" id="signup-email" placeholder="Enter your email">
+      </div>
+      <div class="form-group">
+        <label for="signup-password">Password:</label>
+        <input type="password" id="signup-password" placeholder="Create a password">
+        <div class="password-strength"></div>
+      </div>
+      <div class="form-group">
+        <label for="signup-confirm">Confirm Password:</label>
+        <input type="password" id="signup-confirm" placeholder="Confirm your password">
+      </div>
+      <div class="error-message" id="signup-error"></div>
+      <button class="submit-btn" id="signup-btn">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.auth-demo {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 100%;
+  padding: 20px;
+  color: #eee;
+}
+
+.auth-container {
+  background-color: #1a1b26;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.auth-tabs {
+  display: flex;
+  background-color: #24283b;
+}
+
+.auth-tab {
+  background: none;
+  border: none;
+  color: #a9b1d6;
+  cursor: pointer;
+  flex: 1;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 15px;
+  transition: all 0.3s ease;
+}
+
+.auth-tab.active {
+  background-color: #1a1b26;
+  color: #7aa2f7;
+  border-bottom: 3px solid #7aa2f7;
+}
+
+.auth-form {
+  display: none;
+  padding: 20px;
+}
+
+.auth-form.active {
+  display: block;
+}
+
+.auth-form h2 {
+  color: #c0caf5;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #a9b1d6;
+}
+
+.form-group input {
+  background-color: #24283b;
+  border: 1px solid #414868;
+  border-radius: 5px;
+  color: #c0caf5;
+  font-size: 14px;
+  padding: 10px 15px;
+  width: 100%;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+  border-color: #7aa2f7;
+  outline: none;
+}
+
+.submit-btn {
+  background-color: #7aa2f7;
+  border: none;
+  border-radius: 5px;
+  color: #1a1b26;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 12px;
+  width: 100%;
+  transition: background-color 0.3s;
+}
+
+.submit-btn:hover {
+  background-color: #8eb2ff;
+}
+
+.error-message {
+  color: #f7768e;
+  font-size: 14px;
+  margin-bottom: 15px;
+  min-height: 20px;
+}
+
+.password-strength {
+  height: 5px;
+  margin-top: 5px;
+  background-color: #414868;
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.password-strength::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0;
+  background-color: #f7768e;
+  transition: width 0.3s, background-color 0.3s;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Tab switching
+  const tabs = document.querySelectorAll('.auth-tab');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', function() {
+      const tabName = this.getAttribute('data-tab');
+      
+      // Update active tab
+      tabs.forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      
+      // Show selected form
+      document.querySelectorAll('.auth-form').forEach(form => {
+        form.classList.remove('active');
+      });
+      document.querySelector('.' + tabName + '-form').classList.add('active');
+    });
+  });
+  
+  // Login form handling
+  const loginBtn = document.getElementById('login-btn');
+  const loginEmail = document.getElementById('login-email');
+  const loginPassword = document.getElementById('login-password');
+  const loginError = document.getElementById('login-error');
+  
+  loginBtn.addEventListener('click', function() {
+    loginError.textContent = '';
+    
+    // Simple validation to demonstrate if-else logic
+    if (!loginEmail.value) {
+      loginError.textContent = 'Please enter your email';
+    } else if (!loginPassword.value) {
+      loginError.textContent = 'Please enter your password';
+    } else if (loginEmail.value === 'user@example.com' && loginPassword.value === 'securepass123') {
+      loginError.textContent = '';
+      loginError.style.color = '#9ece6a';
+      loginError.textContent = 'Login successful!';
+      setTimeout(() => {
+        alert('Login successful! Welcome back, Test User.');
+      }, 500);
+    } else if (loginEmail.value === 'user@example.com') {
+      loginError.textContent = 'Incorrect password';
+    } else {
+      loginError.textContent = 'Email not registered';
+    }
+  });
+  
+  // Signup form handling
+  const signupBtn = document.getElementById('signup-btn');
+  const signupName = document.getElementById('signup-name');
+  const signupEmail = document.getElementById('signup-email');
+  const signupPassword = document.getElementById('signup-password');
+  const signupConfirm = document.getElementById('signup-confirm');
+  const signupError = document.getElementById('signup-error');
+  const passwordStrength = document.querySelector('.password-strength');
+  
+  // Password strength indicator
+  signupPassword.addEventListener('input', function() {
+    const password = this.value;
+    let strength = 0;
+    
+    if (password.length >= 8) strength += 25;
+    if (password.match(/[A-Z]/)) strength += 25;
+    if (password.match(/[0-9]/)) strength += 25;
+    if (password.match(/[^A-Za-z0-9]/)) strength += 25;
+    
+    passwordStrength.style.setProperty('--strength', strength + '%');
+    passwordStrength.style.width = strength + '%';
+    
+    if (strength < 25) {
+      passwordStrength.style.backgroundColor = '#f7768e';
+    } else if (strength < 50) {
+      passwordStrength.style.backgroundColor = '#e0af68';
+    } else if (strength < 75) {
+      passwordStrength.style.backgroundColor = '#ff9e64';
+    } else {
+      passwordStrength.style.backgroundColor = '#9ece6a';
+    }
+  });
+  
+  signupBtn.addEventListener('click', function() {
+    signupError.textContent = '';
+    
+    // Simple validation to demonstrate if-else logic
+    if (!signupName.value) {
+      signupError.textContent = 'Please enter your name';
+    } else if (!signupEmail.value) {
+      signupError.textContent = 'Please enter your email';
+    } else if (!signupEmail.value.includes('@')) {
+      signupError.textContent = 'Please enter a valid email';
+    } else if (!signupPassword.value) {
+      signupError.textContent = 'Please create a password';
+    } else if (signupPassword.value.length < 8) {
+      signupError.textContent = 'Password must be at least 8 characters';
+    } else if (!signupConfirm.value) {
+      signupError.textContent = 'Please confirm your password';
+    } else if (signupPassword.value !== signupConfirm.value) {
+      signupError.textContent = 'Passwords do not match';
+    } else if (signupEmail.value === 'user@example.com') {
+      signupError.textContent = 'Email already registered';
+    } else {
+      signupError.textContent = '';
+      signupError.style.color = '#9ece6a';
+      signupError.textContent = 'Account created successfully!';
+      setTimeout(() => {
+        alert('Account created successfully! Welcome, ' + signupName.value);
+      }, 500);
+    }
+  });
+});
+</script>`
+        }
+    };
+    
+    return examples[concept] || null;
+}
+
+export function getConceptDescription(concept) {
+    const descriptions = {
+        'if-else': {
+            title: 'Conditional Logic with If-Else Statements',
+            description: 'If-else statements allow programs to make decisions based on conditions. They execute different blocks of code depending on whether a condition is true or false.',
+            realWorldUse: 'Used in user authentication, form validation, error handling, and any situation where a program needs to make decisions based on different conditions.'
+        },
+        'loops': {
+            title: 'Iterative Processing with Loops',
+            description: 'Loops allow you to execute a block of code repeatedly. The two main types are for loops (definite iteration) and while loops (indefinite iteration).',
+            realWorldUse: 'Used in data processing, search algorithms, batch operations, and any task that requires repeating actions over a collection of items.'
+        },
+        'functions': {
+            title: 'Modular Code with Functions',
+            description: 'Functions are reusable blocks of code that perform specific tasks. They help organize code, reduce repetition, and improve maintainability.',
+            realWorldUse: 'Used throughout programming to create modular, maintainable code. Examples include API handlers, data transformations, utility operations, and encapsulated business logic.'
+        },
+        'oops': {
+            title: 'Object-Oriented Programming',
+            description: 'OOP is a programming paradigm based on "objects" that contain data and code. It uses concepts like classes, inheritance, polymorphism, and encapsulation.',
+            realWorldUse: 'Used in large software systems, GUI applications, game development, and enterprise applications where modeling real-world entities and their relationships is important.'
+        },
+        'recursion': {
+            title: 'Recursive Problem Solving',
+            description: 'Recursion is a technique where a function calls itself to solve smaller instances of the same problem. It requires a base case to prevent infinite recursion.',
+            realWorldUse: 'Used in algorithms for tree/graph traversal, divide-and-conquer strategies, and problems that have a naturally recursive structure like factorial calculations or Fibonacci sequences.'
+        },
+        'data-structures': {
+            title: 'Fundamental Data Structures',
+            description: 'Data structures are specialized formats for organizing and storing data. Each structure has its own strengths and weaknesses for different operations.',
+            realWorldUse: 'Different data structures are used based on access patterns and efficiency requirements. Arrays for indexed access, linked lists for insertions, hash maps for key-value lookups, and trees for hierarchical data.'
+        }
+    };
+    
+    return descriptions[concept] || {
+        title: concept.charAt(0).toUpperCase() + concept.slice(1),
+        description: 'A fundamental programming concept that helps write more effective code.',
+        realWorldUse: 'Used in various real-world applications to solve practical problems.'
+    };
+}
+
+export function getConceptExamples(concept, language = 'python') {
+    const examples = {
+        'if-else': {
+            python: `# Example of if-else statements in Python
+def check_temperature(temp):
+    """
+    Check the temperature and return a message based on the value
+    """
+    if temp > 30:
+        return "It's hot outside! Remember to stay hydrated."
+    elif temp > 20:
+        return "The weather is pleasant today."
+    elif temp > 10:
+        return "It's a bit cool. Maybe bring a light jacket."
+    else:
+        return "It's cold! You should wear a warm coat."
+
+# Test with different temperatures
+print(check_temperature(35))  # Hot
+print(check_temperature(25))  # Pleasant
+print(check_temperature(15))  # Cool
+print(check_temperature(5))   # Cold`,
+
+            javascript: `// Example of if-else statements in JavaScript
+function checkTemperature(temp) {
+  /*
+   * Check the temperature and return a message based on the value
+   */
+  if (temp > 30) {
+    return "It's hot outside! Remember to stay hydrated.";
+  } else if (temp > 20) {
+    return "The weather is pleasant today.";
+  } else if (temp > 10) {
+    return "It's a bit cool. Maybe bring a light jacket.";
+  } else {
+    return "It's cold! You should wear a warm coat.";
+  }
+}
+
+// Test with different temperatures
+console.log(checkTemperature(35));  // Hot
+console.log(checkTemperature(25));  // Pleasant
+console.log(checkTemperature(15));  // Cool
+console.log(checkTemperature(5));   // Cold`,
+
+            java: `// Example of if-else statements in Java
+public class TemperatureChecker {
+    /**
+     * Check the temperature and return a message based on the value
+     */
+    public static String checkTemperature(int temp) {
+        if (temp > 30) {
+            return "It's hot outside! Remember to stay hydrated.";
+        } else if (temp > 20) {
+            return "The weather is pleasant today.";
+        } else if (temp > 10) {
+            return "It's a bit cool. Maybe bring a light jacket.";
+        } else {
+            return "It's cold! You should wear a warm coat.";
+        }
+    }
+
+    public static void main(String[] args) {
+        // Test with different temperatures
+        System.out.println(checkTemperature(35));  // Hot
+        System.out.println(checkTemperature(25));  // Pleasant
+        System.out.println(checkTemperature(15));  // Cool
+        System.out.println(checkTemperature(5));   // Cold
+    }
+}`
+        },
+        
+        'loops': {
+            python: `# Example of loops in Python
+def print_fibonacci(n):
+    """
+    Print the first n Fibonacci numbers using a loop
+    """
+    a, b = 0, 1
+    fibonacci_sequence = []
+    
+    # Using a for loop to generate n Fibonacci numbers
+    for i in range(n):
+        fibonacci_sequence.append(a)
+        a, b = b, a + b
+    
+    return fibonacci_sequence
+
+# Generate the first 10 Fibonacci numbers
+fib_sequence = print_fibonacci(10)
+print(f"Fibonacci sequence: {fib_sequence}")
+
+# Using a while loop to sum numbers from 1 to 10
+total = 0
+counter = 1
+while counter <= 10:
+    total += counter
+    counter += 1
+    
+print(f"Sum of numbers from 1 to 10: {total}")`,
+
+            javascript: `// Example of loops in JavaScript
+function printFibonacci(n) {
+  /*
+   * Generate the first n Fibonacci numbers using a loop
+   */
+  let a = 0, b = 1;
+  let fibonacciSequence = [];
+  
+  // Using a for loop to generate n Fibonacci numbers
+  for (let i = 0; i < n; i++) {
+    fibonacciSequence.push(a);
+    [a, b] = [b, a + b];
+  }
+  
+  return fibonacciSequence;
+}
+
+// Generate the first 10 Fibonacci numbers
+const fibSequence = printFibonacci(10);
+console.log("Fibonacci sequence:", fibSequence);
+
+// Using a while loop to sum numbers from 1 to 10
+let total = 0;
+let counter = 1;
+while (counter <= 10) {
+  total += counter;
+  counter++;
+}
+
+console.log("Sum of numbers from 1 to 10:", total);`,
+
+            java: `// Example of loops in Java
+import java.util.ArrayList;
+import java.util.List;
+
+public class LoopsExample {
+    /**
+     * Generate the first n Fibonacci numbers using a loop
+     */
+    public static List<Integer> printFibonacci(int n) {
+        int a = 0, b = 1;
+        List<Integer> fibonacciSequence = new ArrayList<>();
+        
+        // Using a for loop to generate n Fibonacci numbers
+        for (int i = 0; i < n; i++) {
+            fibonacciSequence.add(a);
+            int sum = a + b;
+            a = b;
+            b = sum;
+        }
+        
+        return fibonacciSequence;
+    }
+    
+    public static void main(String[] args) {
+        // Generate the first 10 Fibonacci numbers
+        List<Integer> fibSequence = printFibonacci(10);
+        System.out.println("Fibonacci sequence: " + fibSequence);
+        
+        // Using a while loop to sum numbers from 1 to 10
+        int total = 0;
+        int counter = 1;
+        while (counter <= 10) {
+            total += counter;
+            counter++;
+        }
+        
+        System.out.println("Sum of numbers from 1 to 10: " + total);
+    }
+}`
+        },
+        
+        'functions': {
+            python: `# Example of functions in Python
+def calculate_area_rectangle(length, width):
+    """
+    Calculate the area of a rectangle
+    
+    Args:
+        length: The length of the rectangle
+        width: The width of the rectangle
+        
+    Returns:
+        The area of the rectangle
+    """
+    return length * width
+
+def calculate_area_circle(radius):
+    """
+    Calculate the area of a circle
+    
+    Args:
+        radius: The radius of the circle
+        
+    Returns:
+        The area of the circle
+    """
+    import math
+    return math.pi * radius ** 2
+
+def calculate_area(shape, **kwargs):
+    """
+    Calculate the area of different shapes
+    
+    Args:
+        shape: The type of shape ('rectangle', 'circle', 'triangle')
+        **kwargs: The parameters specific to each shape
+        
+    Returns:
+        The area of the shape
+    """
+    if shape == 'rectangle':
+        return calculate_area_rectangle(kwargs['length'], kwargs['width'])
+    elif shape == 'circle':
+        return calculate_area_circle(kwargs['radius'])
+    elif shape == 'triangle':
+        return 0.5 * kwargs['base'] * kwargs['height']
+    else:
+        return "Shape not supported"
+
+# Calculate areas of different shapes
+rectangle_area = calculate_area('rectangle', length=5, width=4)
+circle_area = calculate_area('circle', radius=3)
+triangle_area = calculate_area('triangle', base=6, height=8)
+
+print(f"Rectangle area: {rectangle_area}")
+print(f"Circle area: {circle_area:.2f}")
+print(f"Triangle area: {triangle_area}")`,
+
+            javascript: `// Example of functions in JavaScript
+/**
+ * Calculate the area of a rectangle
+ * @param {number} length - The length of the rectangle
+ * @param {number} width - The width of the rectangle
+ * @return {number} The area of the rectangle
+ */
+function calculateAreaRectangle(length, width) {
+  return length * width;
+}
+
+/**
+ * Calculate the area of a circle
+ * @param {number} radius - The radius of the circle
+ * @return {number} The area of the circle
+ */
+function calculateAreaCircle(radius) {
+  return Math.PI * radius ** 2;
+}
+
+/**
+ * Calculate the area of different shapes
+ * @param {string} shape - The type of shape ('rectangle', 'circle', 'triangle')
+ * @param {Object} params - The parameters specific to each shape
+ * @return {number|string} The area of the shape
+ */
+function calculateArea(shape, params) {
+  if (shape === 'rectangle') {
+    return calculateAreaRectangle(params.length, params.width);
+  } else if (shape === 'circle') {
+    return calculateAreaCircle(params.radius);
+  } else if (shape === 'triangle') {
+    return 0.5 * params.base * params.height;
+  } else {
+    return "Shape not supported";
+  }
+}
+
+// Calculate areas of different shapes
+const rectangleArea = calculateArea('rectangle', { length: 5, width: 4 });
+const circleArea = calculateArea('circle', { radius: 3 });
+const triangleArea = calculateArea('triangle', { base: 6, height: 8 });
+
+console.log("Rectangle area:", rectangleArea);
+console.log("Circle area:", circleArea.toFixed(2));
+console.log("Triangle area:", triangleArea);`,
+
+            java: `// Example of functions in Java
+public class FunctionsExample {
+    /**
+     * Calculate the area of a rectangle
+     * @param length The length of the rectangle
+     * @param width The width of the rectangle
+     * @return The area of the rectangle
+     */
+    public static double calculateAreaRectangle(double length, double width) {
+        return length * width;
+    }
+    
+    /**
+     * Calculate the area of a circle
+     * @param radius The radius of the circle
+     * @return The area of the circle
+     */
+    public static double calculateAreaCircle(double radius) {
+        return Math.PI * Math.pow(radius, 2);
+    }
+    
+    /**
+     * Calculate the area of a triangle
+     * @param base The base of the triangle
+     * @param height The height of the triangle
+     * @return The area of the triangle
+     */
+    public static double calculateAreaTriangle(double base, double height) {
+        return 0.5 * base * height;
+    }
+    
+    public static void main(String[] args) {
+        // Calculate areas of different shapes
+        double rectangleArea = calculateAreaRectangle(5, 4);
+        double circleArea = calculateAreaCircle(3);
+        double triangleArea = calculateAreaTriangle(6, 8);
+        
+        System.out.println("Rectangle area: " + rectangleArea);
+        System.out.printf("Circle area: %.2f%n", circleArea);
+        System.out.println("Triangle area: " + triangleArea);
+    }
+}`
+        },
+        
+        'oops': {
+            python: `# Example of Object-Oriented Programming in Python
+class Vehicle:
+    """
+    Base class for all vehicles
+    """
+    def __init__(self, make, model, year):
+        self.make = make
+        self.model = model
+        self.year = year
+        self.is_running = False
+    
+    def start_engine(self):
+        self.is_running = True
+        return f"The {self.make} {self.model}'s engine is now running."
+    
+    def stop_engine(self):
+        self.is_running = False
+        return f"The {self.make} {self.model}'s engine is now off."
+    
+    def get_info(self):
+        return f"{self.year} {self.make} {self.model}"
+    
+
+class Car(Vehicle):
+    """
+    Car class that inherits from Vehicle
+    """
+    def __init__(self, make, model, year, num_doors):
+        super().__init__(make, model, year)
+        self.num_doors = num_doors
+        self.trunk_open = False
+    
+    def open_trunk(self):
+        self.trunk_open = True
+        return f"The trunk of the {self.make} {self.model} is now open."
+    
+    def close_trunk(self):
+        self.trunk_open = False
+        return f"The trunk of the {self.make} {self.model} is now closed."
+    
+    def get_info(self):
+        # Overriding the base class method
+        return f"{super().get_info()}, {self.num_doors}-door"
+
+
+class Motorcycle(Vehicle):
+    """
+    Motorcycle class that inherits from Vehicle
+    """
+    def __init__(self, make, model, year, has_sidecar):
+        super().__init__(make, model, year)
+        self.has_sidecar = has_sidecar
+    
+    def wheelie(self):
+        if self.has_sidecar:
+            return f"Cannot do a wheelie with a sidecar!"
+        return f"Doing a wheelie with the {self.make} {self.model}!"
+    
+    def get_info(self):
+        # Overriding the base class method
+        sidecar_info = "with sidecar" if self.has_sidecar else "without sidecar"
+        return f"{super().get_info()}, {sidecar_info}"
+
+
+# Create instances of Car and Motorcycle
+my_car = Car("Toyota", "Camry", 2022, 4)
+my_motorcycle = Motorcycle("Harley-Davidson", "Street Glide", 2021, False)
+
+# Test the methods
+print(my_car.get_info())
+print(my_car.start_engine())
+print(my_car.open_trunk())
+
+print("\n" + my_motorcycle.get_info())
+print(my_motorcycle.start_engine())
+print(my_motorcycle.wheelie())`,
+
+            javascript: `// Example of Object-Oriented Programming in JavaScript
+class Vehicle {
+  /**
+   * Base class for all vehicles
+   */
+  constructor(make, model, year) {
+    this.make = make;
+    this.model = model;
+    this.year = year;
+    this.isRunning = false;
+  }
+  
+  startEngine() {
+    this.isRunning = true;
+    return `The ${this.make} ${this.model}'s engine is now running.`;
+  }
+  
+  stopEngine() {
+    this.isRunning = false;
+    return `The ${this.make} ${this.model}'s engine is now off.`;
+  }
+  
+  getInfo() {
+    return `${this.year} ${this.make} ${this.model}`;
+  }
+}
+
+class Car extends Vehicle {
+  /**
+   * Car class that extends Vehicle
+   */
+  constructor(make, model, year, numDoors) {
+    super(make, model, year);
+    this.numDoors = numDoors;
+    this.trunkOpen = false;
+  }
+  
+  openTrunk() {
+    this.trunkOpen = true;
+    return `The trunk of the ${this.make} ${this.model} is now open.`;
+  }
+  
+  closeTrunk() {
+    this.trunkOpen = false;
+    return `The trunk of the ${this.make} ${this.model} is now closed.`;
+  }
+  
+  getInfo() {
+    // Overriding the base class method
+    return `${super.getInfo()}, ${this.numDoors}-door`;
+  }
+}
+
+class Motorcycle extends Vehicle {
+  /**
+   * Motorcycle class that extends Vehicle
+   */
+  constructor(make, model, year, hasSidecar) {
+    super(make, model, year);
+    this.hasSidecar = hasSidecar;
+  }
+  
+  wheelie() {
+    if (this.hasSidecar) {
+      return `Cannot do a wheelie with a sidecar!`;
+    }
+    return `Doing a wheelie with the ${this.make} ${this.model}!`;
+  }
+  
+  getInfo() {
+    // Overriding the base class method
+    const sidecarInfo = this.hasSidecar ? "with sidecar" : "without sidecar";
+    return `${super.getInfo()}, ${sidecarInfo}`;
+  }
+}
+
+// Create instances of Car and Motorcycle
+const myCar = new Car("Toyota", "Camry", 2022, 4);
+const myMotorcycle = new Motorcycle("Harley-Davidson", "Street Glide", 2021, false);
+
+// Test the methods
+console.log(myCar.getInfo());
+console.log(myCar.startEngine());
+console.log(myCar.openTrunk());
+
+console.log("\n" + myMotorcycle.getInfo());
+console.log(myMotorcycle.startEngine());
+console.log(myMotorcycle.wheelie());`,
+
+            java: `// Example of Object-Oriented Programming in Java
+public class OOPExample {
+    public static void main(String[] args) {
+        // Create instances of Car and Motorcycle
+        Car myCar = new Car("Toyota", "Camry", 2022, 4);
+        Motorcycle myMotorcycle = new Motorcycle("Harley-Davidson", "Street Glide", 2021, false);
+        
+        // Test the methods
+        System.out.println(myCar.getInfo());
+        System.out.println(myCar.startEngine());
+        System.out.println(myCar.openTrunk());
+        
+        System.out.println("\n" + myMotorcycle.getInfo());
+        System.out.println(myMotorcycle.startEngine());
+        System.out.println(myMotorcycle.wheelie());
+    }
+}
+
+/**
+ * Base class for all vehicles
+ */
+class Vehicle {
+    protected String make;
+    protected String model;
+    protected int year;
+    protected boolean isRunning;
+    
+    public Vehicle(String make, String model, int year) {
+        this.make = make;
+        this.model = model;
+        this.year = year;
+        this.isRunning = false;
+    }
+    
+    public String startEngine() {
+        isRunning = true;
+        return "The " + make + " " + model + "'s engine is now running.";
+    }
+    
+    public String stopEngine() {
+        isRunning = false;
+        return "The " + make + " " + model + "'s engine is now off.";
+    }
+    
+    public String getInfo() {
+        return year + " " + make + " " + model;
+    }
+}
+
+/**
+ * Car class that extends Vehicle
+ */
+class Car extends Vehicle {
+    private int numDoors;
+    private boolean trunkOpen;
+    
+    public Car(String make, String model, int year, int numDoors) {
+        super(make, model, year);
+        this.numDoors = numDoors;
+        this.trunkOpen = false;
+    }
+    
+    public String openTrunk() {
+        trunkOpen = true;
+        return "The trunk of the " + make + " " + model + " is now open.";
+    }
+    
+    public String closeTrunk() {
+        trunkOpen = false;
+        return "The trunk of the " + make + " " + model + " is now closed.";
+    }
+    
+    @Override
+    public String getInfo() {
+        // Overriding the base class method
+        return super.getInfo() + ", " + numDoors + "-door";
+    }
+}
+
+/**
+ * Motorcycle class that extends Vehicle
+ */
+class Motorcycle extends Vehicle {
+    private boolean hasSidecar;
+    
+    public Motorcycle(String make, String model, int year, boolean hasSidecar) {
+        super(make, model, year);
+        this.hasSidecar = hasSidecar;
+    }
+    
+    public String wheelie() {
+        if (hasSidecar) {
+            return "Cannot do a wheelie with a sidecar!";
+        }
+        return "Doing a wheelie with the " + make + " " + model + "!";
+    }
+    
+    @Override
+    public String getInfo() {
+        // Overriding the base class method
+        String sidecarInfo = hasSidecar ? "with sidecar" : "without sidecar";
+        return super.getInfo() + ", " + sidecarInfo;
+    }
+}`
+        },
+        
+        'recursion': {
+            python: `# Example of recursion in Python
+def factorial(n):
+    """
+    Calculate the factorial of a number using recursion
+    
+    Args:
+        n: A non-negative integer
+        
+    Returns:
+        The factorial of n
+    """
+    # Base case
+    if n == 0 or n == 1:
+        return 1
+    
+    # Recursive case
+    return n * factorial(n - 1)
+
+def fibonacci(n):
+    """
+    Calculate the nth Fibonacci number using recursion
+    
+    Args:
+        n: A non-negative integer
+        
+    Returns:
+        The nth Fibonacci number
+    """
+    # Base cases
+    if n <= 0:
+        return 0
+    if n == 1:
+        return 1
+    
+    # Recursive case
+    return fibonacci(n - 1) + fibonacci(n - 2)
+
+def sum_digits(n):
+    """
+    Sum the digits of a number using recursion
+    
+    Args:
+        n: A non-negative integer
+        
+    Returns:
+        The sum of the digits in n
+    """
+    # Base case
+    if n < 10:
+        return n
+    
+    # Recursive case: sum the last digit and the rest
+    return n % 10 + sum_digits(n // 10)
+
+# Test the functions
+print(f"Factorial of 5: {factorial(5)}")  # 120
+print(f"10th Fibonacci number: {fibonacci(10)}")  # 55
+print(f"Sum of digits in 12345: {sum_digits(12345)}")  # 15`,
+
+            javascript: `// Example of recursion in JavaScript
+/**
+ * Calculate the factorial of a number using recursion
+ * @param {number} n - A non-negative integer
+ * @return {number} The factorial of n
+ */
+function factorial(n) {
+  // Base case
+  if (n === 0 || n === 1) {
+    return 1;
+  }
+  
+  // Recursive case
+  return n * factorial(n - 1);
+}
+
+/**
+ * Calculate the nth Fibonacci number using recursion
+ * @param {number} n - A non-negative integer
+ * @return {number} The nth Fibonacci number
+ */
+function fibonacci(n) {
+  // Base cases
+  if (n <= 0) {
+    return 0;
+  }
+  if (n === 1) {
+    return 1;
+  }
+  
+  // Recursive case
+  return fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+/**
+ * Sum the digits of a number using recursion
+ * @param {number} n - A non-negative integer
+ * @return {number} The sum of the digits in n
+ */
+function sumDigits(n) {
+  // Base case
+  if (n < 10) {
+    return n;
+  }
+  
+  // Recursive case: sum the last digit and the rest
+  return n % 10 + sumDigits(Math.floor(n / 10));
+}
+
+// Test the functions
+console.log("Factorial of 5:", factorial(5));  // 120
+console.log("10th Fibonacci number:", fibonacci(10));  // 55
+console.log("Sum of digits in 12345:", sumDigits(12345));  // 15`,
+
+            java: `// Example of recursion in Java
+public class RecursionExample {
+    /**
+     * Calculate the factorial of a number using recursion
+     * @param n A non-negative integer
+     * @return The factorial of n
+     */
+    public static long factorial(int n) {
+        // Base case
+        if (n == 0 || n == 1) {
+            return 1;
+        }
+        
+        // Recursive case
+        return n * factorial(n - 1);
+    }
+    
+    /**
+     * Calculate the nth Fibonacci number using recursion
+     * @param n A non-negative integer
+     * @return The nth Fibonacci number
+     */
+    public static int fibonacci(int n) {
+        // Base cases
+        if (n <= 0) {
+            return 0;
+        }
+        if (n == 1) {
+            return 1;
+        }
+        
+        // Recursive case
+        return fibonacci(n - 1) + fibonacci(n - 2);
+    }
+    
+    /**
+     * Sum the digits of a number using recursion
+     * @param n A non-negative integer
+     * @return The sum of the digits in n
+     */
+    public static int sumDigits(int n) {
+        // Base case
+        if (n < 10) {
+            return n;
+        }
+        
+        // Recursive case: sum the last digit and the rest
+        return n % 10 + sumDigits(n / 10);
+    }
+    
+    public static void main(String[] args) {
+        // Test the functions
+        System.out.println("Factorial of 5: " + factorial(5));  // 120
+        System.out.println("10th Fibonacci number: " + fibonacci(10));  // 55
+        System.out.println("Sum of digits in 12345: " + sumDigits(12345));  // 15
+    }
+}`
+        },
+        
+        'data-structures': {
+            python: `# Example of Data Structures in Python
+class Node:
+    """
+    Node class for linked list implementation
+    """
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+class LinkedList:
+    """
+    Linked List implementation
+    """
+    def __init__(self):
+        self.head = None
+    
+    def append(self, data):
+        """Add a new node at the end of the list"""
+        new_node = Node(data)
+        
+        # If the list is empty
+        if self.head is None:
+            self.head = new_node
+            return
+        
+        # Otherwise, traverse to the last node
+        last = self.head
+        while last.next:
+            last = last.next
+        
+        # Append the new node
+        last.next = new_node
+    
+    def prepend(self, data):
+        """Add a new node at the beginning of the list"""
+        new_node = Node(data)
+        new_node.next = self.head
+        self.head = new_node
+    
+    def delete(self, data):
+        """Delete a node with given data"""
+        # If the list is empty
+        if self.head is None:
+            return
+        
+        # If head node has the data to be deleted
+        if self.head.data == data:
+            self.head = self.head.next
+            return
+        
+        # Search for the node with the data
+        current = self.head
+        while current.next and current.next.data != data:
+            current = current.next
+        
+        # If data was found, delete the node
+        if current.next:
+            current.next = current.next.next
+    
+    def display(self):
+        """Display the linked list"""
+        elements = []
+        current = self.head
+        while current:
+            elements.append(current.data)
+            current = current.next
+        return elements
+
+# Create a linked list and perform operations
+linked_list = LinkedList()
+linked_list.append(1)
+linked_list.append(2)
+linked_list.append(3)
+linked_list.prepend(0)
+print(f"LinkedList after append and prepend: {linked_list.display()}")
+
+linked_list.delete(2)
+print(f"LinkedList after deleting 2: {linked_list.display()}")
+
+# Using Python's built-in data structures
+# List (Dynamic Array)
+my_list = [1, 2, 3, 4, 5]
+my_list.append(6)  # Add to the end
+my_list.insert(0, 0)  # Insert at specific position
+my_list.pop()  # Remove from the end
+print(f"List operations: {my_list}")
+
+# Dictionary (Hash Table)
+my_dict = {'name': 'John', 'age': 30, 'city': 'New York'}
+my_dict['email'] = 'john@example.com'  # Add key-value pair
+del my_dict['age']  # Remove key-value pair
+print(f"Dictionary operations: {my_dict}")
+
+# Set (Unique Elements)
+my_set = {1, 2, 3, 3, 4, 5}  # Duplicate values are automatically removed
+my_set.add(6)  # Add element
+my_set.remove(3)  # Remove element
+print(f"Set operations: {my_set}")`,
+
+            javascript: `// Example of Data Structures in JavaScript
+class Node {
+  /**
+   * Node class for linked list implementation
+   */
+  constructor(data) {
+    this.data = data;
+    this.next = null;
+  }
+}
+
+class LinkedList {
+  /**
+   * Linked List implementation
+   */
+  constructor() {
+    this.head = null;
+  }
+  
+  append(data) {
+    /**
+     * Add a new node at the end of the list
+     */
+    const newNode = new Node(data);
+    
+    // If the list is empty
+    if (this.head === null) {
+      this.head = newNode;
+      return;
+    }
+    
+    // Otherwise, traverse to the last node
+    let last = this.head;
+    while (last.next) {
+      last = last.next;
+    }
+    
+    // Append the new node
+    last.next = newNode;
+  }
+  
+  prepend(data) {
+    /**
+     * Add a new node at the beginning of the list
+     */
+    const newNode = new Node(data);
+    newNode.next = this.head;
+    this.head = newNode;
+  }
+  
+  delete(data) {
+    /**
+     * Delete a node with given data
+     */
+    // If the list is empty
+    if (this.head === null) {
+      return;
+    }
+    
+    // If head node has the data to be deleted
+    if (this.head.data === data) {
+      this.head = this.head.next;
+      return;
+    }
+    
+    // Search for the node with the data
+    let current = this.head;
+    while (current.next && current.next.data !== data) {
+      current = current.next;
+    }
+    
+    // If data was found, delete the node
+    if (current.next) {
+      current.next = current.next.next;
+    }
+  }
+  
+  display() {
+    /**
+     * Display the linked list
+     */
+    const elements = [];
+    let current = this.head;
+    while (current) {
+      elements.push(current.data);
+      current = current.next;
+    }
+    return elements;
+  }
+}
+
+// Create a linked list and perform operations
+const linkedList = new LinkedList();
+linkedList.append(1);
+linkedList.append(2);
+linkedList.append(3);
+linkedList.prepend(0);
+console.log("LinkedList after append and prepend:", linkedList.display());
+
+linkedList.delete(2);
+console.log("LinkedList after deleting 2:", linkedList.display());
+
+// Using JavaScript's built-in data structures
+// Array
+const myArray = [1, 2, 3, 4, 5];
+myArray.push(6);  // Add to the end
+myArray.unshift(0);  // Add to the beginning
+myArray.pop();  // Remove from the end
+console.log("Array operations:", myArray);
+
+// Object (Hash Table)
+const myObject = {name: 'John', age: 30, city: 'New York'};
+myObject.email = 'john@example.com';  // Add key-value pair
+delete myObject.age;  // Remove key-value pair
+console.log("Object operations:", myObject);
+
+// Set (Unique Elements)
+const mySet = new Set([1, 2, 3, 3, 4, 5]);  // Duplicate values are automatically removed
+mySet.add(6);  // Add element
+mySet.delete(3);  // Remove element
+console.log("Set operations:", Array.from(mySet));`,
+
+            java: `// Example of Data Structures in Java
+import java.util.*;
+
+public class DataStructuresExample {
+    // Node class for linked list implementation
+    static class Node {
+        int data;
+        Node next;
+        
+        Node(int data) {
+            this.data = data;
+            this.next = null;
+        }
+    }
+    
+    // Linked List implementation
+    static class LinkedList {
+        Node head;
+        
+        // Add a new node at the end of the list
+        public void append(int data) {
+            Node newNode = new Node(data);
+            
+            // If the list is empty
+            if (head == null) {
+                head = newNode;
+                return;
+            }
+            
+            // Otherwise, traverse to the last node
+            Node last = head;
+            while (last.next != null) {
+                last = last.next;
+            }
+            
+            // Append the new node
+            last.next = newNode;
+        }
+        
+        // Add a new node at the beginning of the list
+        public void prepend(int data) {
+            Node newNode = new Node(data);
+            newNode.next = head;
+            head = newNode;
+        }
+        
+        // Delete a node with given data
+        public void delete(int data) {
+            // If the list is empty
+            if (head == null) {
+                return;
+            }
+            
+            // If head node has the data to be deleted
+            if (head.data == data) {
+                head = head.next;
+                return;
+            }
+            
+            // Search for the node with the data
+            Node current = head;
+            while (current.next != null && current.next.data != data) {
+                current = current.next;
+            }
+            
+            // If data was found, delete the node
+            if (current.next != null) {
+                current.next = current.next.next;
+            }
+        }
+        
+        // Display the linked list
+        public List<Integer> display() {
+            List<Integer> elements = new ArrayList<>();
+            Node current = head;
+            while (current != null) {
+                elements.add(current.data);
+                current = current.next;
+            }
+            return elements;
+        }
+    }
+    
+    public static void main(String[] args) {
+        // Create a linked list and perform operations
+        LinkedList linkedList = new LinkedList();
+        linkedList.append(1);
+        linkedList.append(2);
+        linkedList.append(3);
+        linkedList.prepend(0);
+        System.out.println("LinkedList after append and prepend: " + linkedList.display());
+        
+        linkedList.delete(2);
+        System.out.println("LinkedList after deleting 2: " + linkedList.display());
+        
+        // Using Java's built-in data structures
+        // ArrayList (Dynamic Array)
+        List<Integer> arrayList = new ArrayList<>();
+        arrayList.add(1);  // Add to the end
+        arrayList.add(2);
+        arrayList.add(3);
+        arrayList.add(0, 0);  // Insert at specific position
+        arrayList.remove(arrayList.size() - 1);  // Remove from the end
+        System.out.println("ArrayList operations: " + arrayList);
+        
+        // HashMap (Hash Table)
+        Map<String, String> hashMap = new HashMap<>();
+        hashMap.put("name", "John");
+        hashMap.put("age", "30");
+        hashMap.put("city", "New York");
+        hashMap.put("email", "john@example.com");  // Add key-value pair
+        hashMap.remove("age");  // Remove key-value pair
+        System.out.println("HashMap operations: " + hashMap);
+        
+        // HashSet (Unique Elements)
+        Set<Integer> hashSet = new HashSet<>();
+        hashSet.add(1);
+        hashSet.add(2);
+        hashSet.add(3);
+        hashSet.add(3);  // Duplicate, will be ignored
+        hashSet.add(4);
+        hashSet.add(5);
+        hashSet.add(6);  // Add element
+        hashSet.remove(3);  // Remove element
+        System.out.println("HashSet operations: " + hashSet);
+    }
+}`
+        }
+    };
+    
+    // Return the example code for the given concept and language
+    if (examples[concept] && examples[concept][language]) {
+        return examples[concept][language];
+    } else if (examples[concept]) {
+        // Return the Python version as a fallback
+        return examples[concept]['python'];
+    } else {
+        return null;
+    }
+}
+
+export function getConceptDescription(concept) {
+    const descriptions = {
+        'if-else': {
+            title: "If-Else Statements",
+            description: "Conditional statements that execute different code blocks based on whether specified conditions evaluate to true or false.",
+            realWorldUse: "Used in decision making processes like form validation, user authentication, and business logic implementation."
+        },
+        'loops': {
+            title: "Loops",
+            description: "Programming constructs that allow the execution of a block of code repeatedly until a specific condition is met.",
+            realWorldUse: "Used for processing collections of data, implementing pagination, batch processing, and animations."
+        },
+        'functions': {
+            title: "Functions",
+            description: "Reusable blocks of code designed to perform specific tasks. They help in organizing code, improving readability, and reducing duplication.",
+            realWorldUse: "Used in creating modular applications, implementing algorithms, handling events, and data transformations."
+        },
+        'oops': {
+            title: "Object-Oriented Programming",
+            description: "A programming paradigm based on 'objects' containing data and methods. Key concepts include inheritance, encapsulation, polymorphism, and abstraction.",
+            realWorldUse: "Used in building scalable applications, frameworks, simulations, games, and complex systems modeling."
+        },
+        'recursion': {
+            title: "Recursion",
+            description: "A programming technique where a function calls itself to solve a problem by breaking it down into smaller instances of the same problem.",
+            realWorldUse: "Used for tree traversal, fractals generation, solving complex mathematical problems, and algorithms like quicksort and binary search."
+        },
+        'data-structures': {
+            title: "Data Structures",
+            description: "Specialized formats for organizing, processing, retrieving and storing data. Examples include arrays, linked lists, stacks, queues, trees, and graphs.",
+            realWorldUse: "Used in database design, network routing algorithms, compiler design, and operating systems."
+        }
+    };
+    
+    return descriptions[concept] || {
+        title: concept.charAt(0).toUpperCase() + concept.slice(1),
+        description: "A programming concept used in various applications.",
+        realWorldUse: "Applied in multiple real-world scenarios and practical applications."
+    };
+}

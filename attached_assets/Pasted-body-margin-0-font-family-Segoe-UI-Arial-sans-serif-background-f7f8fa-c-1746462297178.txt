@@ -1,0 +1,170 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f7f8fa;
+    color: #222;
+}
+
+.main-container {
+    display: flex;
+    height: 100vh;
+    margin-left: 80px; /* space for sidebar */
+}
+
+.panel {
+    flex: 1;
+    padding: 32px 24px;
+    box-sizing: border-box;
+    background: #fff;
+    border-right: 1px solid #eee;
+    overflow-y: auto;
+}
+
+.code-panel { background: #f9fafb; }
+.realworld-panel { background: #f6f7fb; }
+.practice-panel { background: #f9fafb; border-right: none; }
+
+#sidebar-root {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 80px;
+    height: 100vh;
+    background: #232946;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+}
+
+.sidebar-icon {
+    width: 48px;
+    height: 48px;
+    margin: 16px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    transition: background 0.2s;
+    cursor: pointer;
+    position: relative;
+}
+
+.sidebar-icon:hover {
+    background: #393e6e;
+}
+
+.sidebar-tooltip {
+    position: absolute;
+    left: 60px;
+    background: #232946;
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.sidebar-icon:hover .sidebar-tooltip {
+    opacity: 1;
+}
+
+#popup-canvas-root {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    background: rgba(0,0,0,0.25);
+}
+
+.popup-canvas {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    padding: 32px;
+    min-width: 400px;
+    max-width: 600px;
+    min-height: 200px;
+    position: relative;
+    animation: popupIn 0.2s;
+}
+
+@keyframes popupIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.popup-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 22px;
+    color: #888;
+    cursor: pointer;
+}
+
+#console-output-root {
+    position: fixed;
+    left: 80px;
+    right: 0;
+    bottom: 0;
+    background: #181a20;
+    color: #fff;
+    min-height: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s;
+    z-index: 150;
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.12);
+}
+
+#console-output-root.open {
+    min-height: 120px;
+    max-height: 300px;
+    padding: 16px 32px;
+}
+
+.console-close {
+    position: absolute;
+    top: 8px;
+    right: 24px;
+    font-size: 20px;
+    color: #fff;
+    cursor: pointer;
+}
+
+#helpline-root {
+    position: fixed;
+    right: 32px;
+    bottom: 32px;
+    z-index: 300;
+}
+
+.helpline-btn {
+    background: #232946;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    font-size: 28px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.helpline-btn:hover {
+    background: #393e6e;
+}

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Meets Reality - Login Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .error-message {
+            color: #dc3545;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .success-message {
+            color: #28a745;
+            display: none;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>🔒 Login Demo</h1>
+        <h3>Real-world If-Else Implementation</h3>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="text" id="email" placeholder="Enter admin" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" placeholder="Enter 1234" required>
+            </div>
+            
+            <button type="submit">Login</button>
+        </form>
+
+        <div class="error-message" id="errorMessage">
+            Invalid credentials! Try admin/1234
+        </div>
+
+        <div class="success-message" id="successMessage">
+            Login Successful! 🎉 Code meets Reality!
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get input values
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Hide previous messages
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+
+            // Core if-else logic
+            if (email === 'admin' && password === '1234') {
+                document.getElementById('successMessage').style.display = 'block';
+                // Clear form fields
+                document.getElementById('loginForm').reset();
+            } else {
+                document.getElementById('errorMessage').style.display = 'block';
+            }
+        });
+
+        // Clear error when user starts typing
+        document.getElementById('email').addEventListener('input', function() {
+            document.getElementById('errorMessage').style.display = 'none';
+        });
+        
+        document.getElementById('password').addEventListener('input', function() {
+            document.getElementById('errorMessage').style.display = 'none';
+        });
+    </script>
+</body>
+</html>

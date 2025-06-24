@@ -1,0 +1,1082 @@
+// Sidebar component
+import { showConceptPopup } from '../concept-popup.js';
+
+export function Sidebar(root) {
+    // We'll use the global checkOpenAiApiStatus function from app.js for API status checks
+
+    root.innerHTML = `
+            <div class="sidebar-section">
+                <h3>Learning Paths</h3>
+                <ul class="sidebar-menu">
+                    <li class="sidebar-menu-item learning-path-item" data-concept="if-else">
+                        <i data-feather="git-branch"></i>
+                        <span class="sidebar-text">If-Else Statements</span>
+                    </li>
+                    <li class="sidebar-menu-item learning-path-item" data-concept="loops">
+                        <i data-feather="repeat"></i>
+                        <span class="sidebar-text">Loops</span>
+                    </li>
+                    <li class="sidebar-menu-item learning-path-item" data-concept="functions">
+                        <i data-feather="box"></i>
+                        <span class="sidebar-text">Functions</span>
+                    </li>
+                    <li class="sidebar-menu-item learning-path-item" data-concept="oops">
+                        <i data-feather="layers"></i>
+                        <span class="sidebar-text">Object-Oriented Programming</span>
+                    </li>
+                    <li class="sidebar-menu-item learning-path-item" data-concept="recursion">
+                        <i data-feather="rewind"></i>
+                        <span class="sidebar-text">Recursion</span>
+                    </li>
+                    <li class="sidebar-menu-item learning-path-item" data-concept="data-structures">
+                        <i data-feather="database"></i>
+                        <span class="sidebar-text">Data Structures</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>Tools</h3>
+                <ul class="sidebar-menu sidebar-tools">
+                    <!-- Practice Problems menu item has been removed from Tools section as requested -->
+                    <li class="sidebar-menu-item" id="reference-btn">
+                        <i data-feather="book"></i>
+                        <span class="sidebar-text">Reference Guide</span>
+                    </li>
+                    <li class="sidebar-menu-item" id="history-btn">
+                        <i data-feather="clock"></i>
+                        <span class="sidebar-text">History</span>
+                    </li>
+                    <li class="sidebar-menu-item" id="auth-example-btn">
+                        <i data-feather="user-check"></i>
+                        <span class="sidebar-text">Authentication Demo</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>Settings</h3>
+                <ul class="sidebar-menu">
+                    <li class="sidebar-menu-item" id="settings-btn">
+                        <i data-feather="settings"></i>
+                        <span class="sidebar-text">Preferences</span>
+                    </li>
+                </ul>
+            </div>
+    `;
+    
+    // Initialize Feather Icons again for the sidebar content
+    if (window.feather) {
+        feather.replace();
+    }
+    
+    // Attach event listeners to sidebar items - Learning Paths
+    const conceptItems = root.querySelectorAll('.sidebar-menu-item[data-concept]');
+    conceptItems.forEach(item => {
+        item.addEventListener('click', async () => {
+            const concept = item.getAttribute('data-concept');
+            console.log(`Learning path button clicked: ${concept}`);
+            
+            // Update the concept selector and trigger change event
+            const conceptSelector = document.getElementById('concept-selector');
+            if (conceptSelector) {
+                conceptSelector.value = concept;
+                conceptSelector.dispatchEvent(new Event('change'));
+                
+                // Visual feedback - add active class to clicked item
+                conceptItems.forEach(ci => ci.classList.remove('active'));
+                item.classList.add('active');
+                
+                // Show concept popup with AI-generated information
+                try {
+                    console.log("Calling showConceptPopup from Sidebar.js");
+                    // Check if the function is available (either imported or global)
+                    if (typeof showConceptPopup === 'function') {
+                        showConceptPopup(concept);
+                    } else if (typeof window.showConceptPopup === 'function') {
+                        window.showConceptPopup(concept);
+                    } else {
+                        console.error("showConceptPopup function not found");
+                        // Direct API call as fallback
+                        fetch(`/api/concept/${concept}`)
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error(`API error: ${response.status}`);
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                // Get the popup canvas
+                                const popup = document.querySelector('.popup-canvas');
+                                if (popup) {
+                                    // Create popup content
+                                    const popupContent = popup.querySelector('.popup-content') || document.createElement('div');
+                                    popupContent.classList.add('popup-content');
+                                    
+                                    popupContent.innerHTML = `
+                                        <div class="popup-header">
+                                            <h2>Learning Path: ${concept.charAt(0).toUpperCase() + concept.slice(1)}</h2>
+                                            <button class="popup-close">&times;</button>
+                                        </div>
+                                        <div class="popup-body">
+                                            <div class="ai-learning-path">
+                                                <h3>${data.title || concept.charAt(0).toUpperCase() + concept.slice(1)}</h3>
+                                                <div class="concept-description">
+                                                    <p>${data.description || "Learning about this concept..."}</p>
+                                                    <h4>Real-World Applications</h4>
+                                                    <p>${data.real_world || "Used in various software development scenarios."}</p>
+                                                    <h4>Example</h4>
+                                                    <div class="code-snippet">
+                                                        <pre><code class="language-python">${data.example || "# Example code would appear here"}</code></pre>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                    
+                                    // Show the popup
+                                    popup.appendChild(popupContent);
+                                    popup.classList.add('active');
+                                    
+                                    // Add close button handler
+                                    const closeBtn = popupContent.querySelector('.popup-close');
+                                    if (closeBtn) {
+                                        closeBtn.addEventListener('click', () => {
+                                            popup.classList.remove('active');
+                                        });
+                                    }
+                                    
+                                    // Apply syntax highlighting
+                                    const codeBlocks = popupContent.querySelectorAll('pre code');
+                                    if (window.hljs) {
+                                        codeBlocks.forEach(block => {
+                                            try {
+                                                window.hljs.highlightElement(block);
+                                            } catch (e) {
+                                                window.hljs.highlightBlock(block);
+                                            }
+                                        });
+                                    }
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Error fetching concept data:", error);
+                            });
+                    }
+                } catch (error) {
+                    console.error("Error showing concept popup:", error);
+                }
+                
+                // Get the language from the selector
+                const language = document.getElementById('language-selector').value || 'python';
+                
+                // Try to load example code for this concept into the editor
+                try {
+                    // Dynamically import the concept examples module
+                    console.log("Attempting to import ConceptExamples.js from Sidebar");
+                    const module = await import('/static/js/components/ConceptExamples.js');
+                    
+                    // Get example code for the concept
+                    const exampleCode = module.getConceptExamples(concept, language);
+                    
+                    if (exampleCode) {
+                        console.log(`Loaded example code for ${concept} in ${language}`);
+                        
+                        // Set the example code in the editor if available
+                        if (window.editor && window.editor.setValue) {
+                            window.editor.setValue(exampleCode);
+                            console.log("Updated editor with example code");
+                            
+                            // Now handle the real-world example and GUI demo
+                            try {
+                                // Show loading state in the real-world code section
+                                const realWorldRoot = document.getElementById('realworld-code-root');
+                                if (realWorldRoot) {
+                                    const realWorldContent = realWorldRoot.querySelector('.panel-content');
+                                    if (realWorldContent) {
+                                        realWorldContent.innerHTML = `
+                                            <div class="loading-spinner-container">
+                                                <div class="loading-spinner"></div>
+                                                <p>Generating real-world examples...</p>
+                                            </div>
+                                        `;
+                                    }
+                                }
+                                
+                                // For if-else, use our special login/signup example
+                                if (concept === 'if-else') {
+                                    console.log("Using predefined authentication example for if-else");
+                                    
+                                    try {
+                                        // First try to use our dedicated if-else handler
+                                        console.log("Attempting to load if_else_handler.js");
+                                        if (typeof loadIfElseAuthDemo === 'function') {
+                                            console.log("Found loadIfElseAuthDemo function, calling it directly");
+                                            loadIfElseAuthDemo();
+                                        } else {
+                                            console.log("loadIfElseAuthDemo function not found, trying dynamic import");
+                                            // Try dynamic import as fallback
+                                            import('/static/js/if_else_handler.js')
+                                                .then(module => {
+                                                    if (typeof module.loadIfElseAuthDemo === 'function') {
+                                                        console.log("Successfully imported if_else_handler.js");
+                                                        module.loadIfElseAuthDemo();
+                                                    } else {
+                                                        throw new Error("loadIfElseAuthDemo function not found in module");
+                                                    }
+                                                })
+                                                .catch(err => {
+                                                    console.warn("Error loading if_else_handler.js:", err);
+                                                    // Fall back to the real-world example below
+                                                    const realWorldExample = module.getRealWorldExample(concept, language);
+                                                    updateRealWorldContent(realWorldExample, language);
+                                                });
+                                        }
+                                    } catch (err) {
+                                        console.warn("Error in if-else specialized handling:", err);
+                                        // Fall back to the real-world example
+                                        const realWorldExample = module.getRealWorldExample(concept, language);
+                                        updateRealWorldContent(realWorldExample, language);
+                                    }
+                                } else {
+                                    // For other concepts, use the standard real-world example
+                                    const realWorldExample = module.getRealWorldExample(concept, language);
+                                    updateRealWorldContent(realWorldExample, language);
+                                }
+
+                                // Helper function to update real-world content
+                                function updateRealWorldContent(realWorldExample, language) {
+                                    if (realWorldExample) {
+                                        // Update the real-world code section with the predefined example
+                                        const realWorldRoot = document.getElementById('realworld-code-root');
+                                        if (realWorldRoot) {
+                                            const realWorldContent = realWorldRoot.querySelector('.panel-content');
+                                            if (realWorldContent) {
+                                                const codeToShow = realWorldExample.code[language] || realWorldExample.code.python;
+                                                
+                                                realWorldContent.innerHTML = `
+                                                    <h3>${realWorldExample.title}</h3>
+                                                    <p>${realWorldExample.description}</p>
+                                                    <div class="code-block">
+                                                        <pre><code class="language-${language}">${codeToShow}</code></pre>
+                                                    </div>
+                                                    <button id="open-gui-demo" class="primary-button">
+                                                        <i data-feather="monitor"></i>
+                                                        Open GUI Demo
+                                                    </button>
+                                                `;
+                                                
+                                                // Apply syntax highlighting
+                                                document.querySelectorAll('pre code').forEach((block) => {
+                                                    if (window.hljs) {
+                                                        window.hljs.highlightBlock(block);
+                                                    }
+                                                });
+                                                
+                                                // Reinitialize Feather icons
+                                                if (window.feather) {
+                                                    feather.replace();
+                                                }
+                                                
+                                                // Add event listener to Open GUI Demo button
+                                                const openGuiDemoBtn = realWorldContent.querySelector('#open-gui-demo');
+                                                if (openGuiDemoBtn) {
+                                                    openGuiDemoBtn.addEventListener('click', () => {
+                                                        if (typeof openGuiDemo === 'function') {
+                                                            openGuiDemo();
+                                                        }
+                                                    });
+                                                }
+                                            }
+                                        }
+                                        
+                                        // Update the GUI demo with predefined HTML
+                                        const guiDemoRoot = document.getElementById('gui-demo-root');
+                                        if (guiDemoRoot) {
+                                            const guiDemoContent = guiDemoRoot.querySelector('.panel-content');
+                                            if (guiDemoContent && realWorldExample.demo_html) {
+                                                guiDemoContent.innerHTML = realWorldExample.demo_html;
+                                            }
+                                        }
+                                    }
+                                }
+                            } catch (error) {
+                                console.error("Error setting up real-world examples:", error);
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Error loading concept examples:', e);
+                    
+                    // Show error in popup if it exists
+                    const popup = document.querySelector('.popup-canvas');
+                    if (popup) {
+                        const popupContent = popup.querySelector('.popup-content');
+                        if (popupContent) {
+                            const aiLearningPath = popupContent.querySelector('.ai-learning-path');
+                            if (aiLearningPath) {
+                                aiLearningPath.innerHTML = `
+                                    <h3>Error Loading Examples</h3>
+                                    <p>Sorry, we couldn't load examples for this concept. Please try again later.</p>
+                                `;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+    
+    // Reference button event listener
+    const referenceBtn = root.querySelector('#reference-btn');
+    if (referenceBtn) {
+        referenceBtn.addEventListener('click', () => {
+            console.log("Reference button clicked");
+            
+            // Show popup canvas with reference guide
+            const popup = document.querySelector('.popup-canvas');
+            if (popup) {
+                popup.classList.add('active');
+                const popupContent = popup.querySelector('.popup-content');
+                if (popupContent) {
+                    // Set the popup content
+                    popupContent.innerHTML = `
+                        <div class="popup-header">
+                            <h2>Reference Guide</h2>
+                            <button class="popup-close">&times;</button>
+                        </div>
+                        <div class="popup-body">
+                            <div class="reference-content">
+                                <h3>Quick Reference</h3>
+                                <div class="reference-section">
+                                    <h4>Keyboard Shortcuts</h4>
+                                    <ul>
+                                        <li><kbd>Ctrl</kbd> + <kbd>Enter</kbd> - Run Code</li>
+                                        <li><kbd>Ctrl</kbd> + <kbd>S</kbd> - Save Code</li>
+                                        <li><kbd>Ctrl</kbd> + <kbd>/</kbd> - Toggle Comment</li>
+                                        <li><kbd>Ctrl</kbd> + <kbd>F</kbd> - Find in Code</li>
+                                    </ul>
+                                </div>
+                                <div class="reference-section">
+                                    <h4>Coding Concepts</h4>
+                                    <ul>
+                                        <li><a class="reference-link learning-path-item" data-concept="if-else">If-Else Statements</a></li>
+                                        <li><a class="reference-link learning-path-item" data-concept="loops">Loops</a></li>
+                                        <li><a class="reference-link learning-path-item" data-concept="functions">Functions</a></li>
+                                        <li><a class="reference-link learning-path-item" data-concept="oops">Object-Oriented Programming</a></li>
+                                        <li><a class="reference-link learning-path-item" data-concept="recursion">Recursion</a></li>
+                                        <li><a class="reference-link learning-path-item" data-concept="data-structures">Data Structures</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Attach close event listener
+                    const closeBtn = popupContent.querySelector('.popup-close');
+                    if (closeBtn) {
+                        closeBtn.addEventListener('click', () => {
+                            popup.classList.remove('active');
+                        });
+                    }
+                    
+                    // Attach event listeners to concept links
+                    const conceptLinks = popupContent.querySelectorAll('.reference-link[data-concept]');
+                    conceptLinks.forEach(link => {
+                        link.addEventListener('click', () => {
+                            const concept = link.getAttribute('data-concept');
+                            // Find and click the corresponding sidebar item
+                            const sidebarItem = root.querySelector(`.sidebar-menu-item[data-concept="${concept}"]`);
+                            if (sidebarItem) {
+                                sidebarItem.click();
+                            }
+                        });
+                    });
+                }
+            }
+        });
+    }
+    
+    // History button event listener
+    const historyBtn = root.querySelector('#history-btn');
+    if (historyBtn) {
+        historyBtn.addEventListener('click', () => {
+            console.log("History button clicked");
+            
+            // Show popup canvas with history
+            const popup = document.querySelector('.popup-canvas');
+            if (popup) {
+                popup.classList.add('active');
+                const popupContent = popup.querySelector('.popup-content');
+                if (popupContent) {
+                    // Set the popup content with loading state
+                    popupContent.innerHTML = `
+                        <div class="popup-header">
+                            <h2>History</h2>
+                            <button class="popup-close">&times;</button>
+                        </div>
+                        <div class="popup-body">
+                            <div class="history-content">
+                                <div class="loading-spinner-container">
+                                    <div class="loading-spinner"></div>
+                                    <p>Loading history...</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Attach close event listener
+                    const closeBtn = popupContent.querySelector('.popup-close');
+                    if (closeBtn) {
+                        closeBtn.addEventListener('click', () => {
+                            popup.classList.remove('active');
+                        });
+                    }
+                    
+                    // Fetch history data
+                    fetch('/api/history')
+                        .then(response => response.json())
+                        .then(data => {
+                            const historyContent = popupContent.querySelector('.history-content');
+                            if (historyContent) {
+                                if (data && data.length > 0) {
+                                    // Format the history content
+                                    let historyHtml = '<h3>Recent Code Runs</h3><div class="history-list">';
+                                    
+                                    data.forEach(item => {
+                                        const timestamp = new Date(item.timestamp).toLocaleString();
+                                        const language = item.language || 'python';
+                                        const success = item.success ? 'success' : 'error';
+                                        
+                                        historyHtml += `
+                                            <div class="history-item ${success}">
+                                                <div class="history-item-header">
+                                                    <span class="history-timestamp">${timestamp}</span>
+                                                    <span class="history-language">${language}</span>
+                                                </div>
+                                                <div class="history-code-preview">
+                                                    <pre><code class="language-${language}">${item.code.substring(0, 100)}${item.code.length > 100 ? '...' : ''}</code></pre>
+                                                </div>
+                                                <button class="history-load-btn" data-code="${encodeURIComponent(item.code)}" data-language="${language}">
+                                                    Load in Editor
+                                                </button>
+                                            </div>
+                                        `;
+                                    });
+                                    
+                                    historyHtml += '</div>';
+                                    historyContent.innerHTML = historyHtml;
+                                    
+                                    // Apply syntax highlighting
+                                    popupContent.querySelectorAll('pre code').forEach((block) => {
+                                        if (window.hljs) {
+                                            window.hljs.highlightBlock(block);
+                                        }
+                                    });
+                                    
+                                    // Add event listeners to load buttons
+                                    const loadButtons = popupContent.querySelectorAll('.history-load-btn');
+                                    loadButtons.forEach(btn => {
+                                        btn.addEventListener('click', () => {
+                                            const code = decodeURIComponent(btn.getAttribute('data-code'));
+                                            const language = btn.getAttribute('data-language');
+                                            
+                                            // Update language selector if needed
+                                            const languageSelector = document.getElementById('language-selector');
+                                            if (languageSelector && languageSelector.value !== language) {
+                                                languageSelector.value = language;
+                                                languageSelector.dispatchEvent(new Event('change'));
+                                            }
+                                            
+                                            // Set the code in the editor
+                                            if (window.editor && window.editor.setValue) {
+                                                window.editor.setValue(code);
+                                                
+                                                // Close the popup
+                                                popup.classList.remove('active');
+                                            }
+                                        });
+                                    });
+                                } else {
+                                    historyContent.innerHTML = `
+                                        <h3>No History</h3>
+                                        <p>Your code execution history will appear here once you start running code.</p>
+                                    `;
+                                }
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching history:', error);
+                            
+                            // Show error in the history content
+                            const historyContent = popupContent.querySelector('.history-content');
+                            if (historyContent) {
+                                historyContent.innerHTML = `
+                                    <h3>Error Loading History</h3>
+                                    <p>Sorry, we couldn't load your history. Please try again later.</p>
+                                `;
+                            }
+                        });
+                }
+            }
+        });
+    }
+    
+    // Settings button event listener
+    const settingsBtn = root.querySelector('#settings-btn');
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', () => {
+            console.log("Settings button clicked");
+            
+            // Show popup canvas with settings
+            const popup = document.querySelector('.popup-canvas');
+            if (popup) {
+                popup.classList.add('active');
+                const popupContent = popup.querySelector('.popup-content');
+                if (popupContent) {
+                    // Set the popup content
+                    popupContent.innerHTML = `
+                        <div class="popup-header">
+                            <h2>Preferences</h2>
+                            <button class="popup-close">&times;</button>
+                        </div>
+                        <div class="popup-body">
+                            <div class="settings-content">
+                                <h3>Editor Settings</h3>
+                                <div class="settings-group">
+                                    <label for="editor-font-size">Font Size</label>
+                                    <select id="editor-font-size" class="settings-input">
+                                        <option value="12px">12px</option>
+                                        <option value="14px" selected>14px</option>
+                                        <option value="16px">16px</option>
+                                        <option value="18px">18px</option>
+                                    </select>
+                                </div>
+                                <div class="settings-group">
+                                    <label for="editor-tab-size">Tab Size</label>
+                                    <select id="editor-tab-size" class="settings-input">
+                                        <option value="2">2 spaces</option>
+                                        <option value="4" selected>4 spaces</option>
+                                        <option value="8">8 spaces</option>
+                                    </select>
+                                </div>
+                                <h3>Interface Settings</h3>
+                                <div class="settings-group">
+                                    <label for="interface-animations">Enable Animations</label>
+                                    <input type="checkbox" id="interface-animations" class="settings-checkbox" checked>
+                                </div>
+                                
+                                <h3>AI Integration Settings</h3>
+                                
+                                <!-- OpenAI Integration -->
+                                <div class="settings-group">
+                                    <label for="ai-provider">AI Provider</label>
+                                    <select id="ai-provider" class="settings-input" style="margin-top: 10px;">
+                                        <option value="openai">OpenAI/ChatGPT</option>
+                                    </select>
+                                    <small style="display: block; margin-top: 5px; font-size: 12px; color: #a9b1d6;">Using OpenAI for all AI features</small>
+                                </div>
+                                
+                                <!-- OpenAI Section -->
+                                <div id="openai-section" class="settings-group ai-provider-section">
+                                    <label for="openai-integration">OpenAI API Status</label>
+                                    <div class="integration-status">
+                                        <span class="status-indicator status-error" id="openai-status-indicator"></span>
+                                        <span id="openai-status-text">Checking API status...</span>
+                                    </div>
+                                    <div class="api-key-form" style="margin-top: 10px;">
+                                        <p>To use OpenAI's powerful models (like GPT-4o and DALL-E), you need a valid API key.</p>
+                                        <input type="password" id="openai-api-key" class="settings-input" placeholder="Enter your OpenAI API key" style="width: 100%; margin-top: 10px;">
+                                        <small style="display: block; margin-top: 5px; font-size: 12px; color: #a9b1d6;">Your API key will only be stored in your browser's local storage.</small>
+                                        <button id="save-openai-key" class="secondary-button" style="margin-top: 10px;">Update OpenAI Key</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Anthropic Section -->
+                                <div id="anthropic-section" class="settings-group ai-provider-section" style="display: none;">
+                                    <label for="anthropic-integration">Anthropic API Status</label>
+                                    <div class="integration-status">
+                                        <span class="status-indicator status-error" id="anthropic-status-indicator"></span>
+                                        <span id="anthropic-status-text">Checking API status...</span>
+                                    </div>
+                                    <div class="api-key-form" style="margin-top: 10px;">
+                                        <p>To use Anthropic's Claude models (like Claude 3.5 Sonnet), you need a valid API key.</p>
+                                        <input type="password" id="anthropic-api-key" class="settings-input" placeholder="Enter your Anthropic API key" style="width: 100%; margin-top: 10px;">
+                                        <small style="display: block; margin-top: 5px; font-size: 12px; color: #a9b1d6;">Your API key will only be stored in your browser's local storage.</small>
+                                        <button id="save-anthropic-key" class="secondary-button" style="margin-top: 10px;">Update Anthropic Key</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Perplexity Section -->
+                                <div id="perplexity-section" class="settings-group ai-provider-section" style="display: none;">
+                                    <label for="perplexity-integration">Perplexity API Status</label>
+                                    <div class="integration-status">
+                                        <span class="status-indicator status-error" id="perplexity-status-indicator"></span>
+                                        <span id="perplexity-status-text">Checking API status...</span>
+                                    </div>
+                                    <div class="api-key-form" style="margin-top: 10px;">
+                                        <p>To use Perplexity's llama-3.1-sonar models with online search capabilities, you need a valid API key.</p>
+                                        <input type="password" id="perplexity-api-key" class="settings-input" placeholder="Enter your Perplexity API key" style="width: 100%; margin-top: 10px;">
+                                        <small style="display: block; margin-top: 5px; font-size: 12px; color: #a9b1d6;">Your API key will only be stored in your browser's local storage.</small>
+                                        <button id="save-perplexity-key" class="secondary-button" style="margin-top: 10px;">Update Perplexity Key</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Hugging Face Section -->
+                                <div id="huggingface-section" class="settings-group ai-provider-section" style="display: none;">
+                                    <label for="huggingface-integration">Hugging Face API Status</label>
+                                    <div class="integration-status">
+                                        <span class="status-indicator status-error" id="huggingface-status-indicator"></span>
+                                        <span id="huggingface-status-text">Checking API status...</span>
+                                    </div>
+                                    <div class="api-key-form" style="margin-top: 10px;">
+                                        <p>To use Hugging Face's Inference API (with free tier access), you need a valid API token.</p>
+                                        <input type="password" id="huggingface-api-key" class="settings-input" placeholder="Enter your Hugging Face API token" style="width: 100%; margin-top: 10px;">
+                                        <small style="display: block; margin-top: 5px; font-size: 12px; color: #a9b1d6;">Your API token will only be stored in your browser's local storage.</small>
+                                        
+                                        <div style="margin-top: 15px;">
+                                            <label for="huggingface-model">Model (Optional)</label>
+                                            <input type="text" id="huggingface-model" class="settings-input" placeholder="e.g., gpt2, microsoft/DialoGPT-medium" style="width: 100%; margin-top: 5px;">
+                                            <small style="display: block; margin-top: 5px; font-size: 12px; color: #a9b1d6;">Leave empty to use platform default model</small>
+                                        </div>
+                                        
+                                        <button id="save-huggingface-key" class="secondary-button" style="margin-top: 15px;">Update Hugging Face Token</button>
+                                    </div>
+                                </div>
+                                
+                                <button id="save-settings" class="primary-button">Save Settings</button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Attach close event listener
+                    const closeBtn = popupContent.querySelector('.popup-close');
+                    if (closeBtn) {
+                        closeBtn.addEventListener('click', () => {
+                            popup.classList.remove('active');
+                        });
+                    }
+                    
+                    // Load current settings if available
+                    const loadSettings = () => {
+                        try {
+                            const savedSettings = localStorage.getItem('code-meets-reality-settings');
+                            if (savedSettings) {
+                                const settings = JSON.parse(savedSettings);
+                                
+                                // Apply editor settings
+                                if (settings.editor) {
+                                    if (settings.editor.fontSize) {
+                                        const fontSizeSelect = document.getElementById('editor-font-size');
+                                        if (fontSizeSelect) {
+                                            fontSizeSelect.value = settings.editor.fontSize;
+                                        }
+                                    }
+                                    
+                                    if (settings.editor.tabSize) {
+                                        const tabSizeSelect = document.getElementById('editor-tab-size');
+                                        if (tabSizeSelect) {
+                                            tabSizeSelect.value = settings.editor.tabSize;
+                                        }
+                                    }
+                                }
+                                
+                                // Apply interface settings
+                                if (settings.interface) {
+                                    if (settings.interface.animations !== undefined) {
+                                        const animationsCheckbox = document.getElementById('interface-animations');
+                                        if (animationsCheckbox) {
+                                            animationsCheckbox.checked = settings.interface.animations;
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (e) {
+                            console.error('Error loading settings:', e);
+                        }
+                    };
+                    
+                    // Function to switch between AI provider panels
+                    const switchAIProvider = (provider) => {
+                        // Hide all sections first
+                        const sections = popupContent.querySelectorAll('.ai-provider-section');
+                        sections.forEach(section => {
+                            section.style.display = 'none';
+                        });
+                        
+                        // Show the selected section
+                        const selectedSection = popupContent.querySelector(`#${provider}-section`);
+                        if (selectedSection) {
+                            selectedSection.style.display = 'block';
+                        }
+                        
+                        // Check the appropriate API status
+                        checkApiStatus(provider);
+                        
+                        // Save the selected provider to localStorage
+                        localStorage.setItem('selected-ai-provider', provider);
+                    };
+                    
+                    // AI provider selection event
+                    const aiProviderSelect = popupContent.querySelector('#ai-provider');
+                    if (aiProviderSelect) {
+                        // Set provider from localStorage if exists
+                        const savedProvider = localStorage.getItem('selected-ai-provider');
+                        if (savedProvider) {
+                            aiProviderSelect.value = savedProvider;
+                        }
+                        
+                        // Initialize the correct panel
+                        switchAIProvider(aiProviderSelect.value);
+                        
+                        // Add change event listener
+                        aiProviderSelect.addEventListener('change', () => {
+                            switchAIProvider(aiProviderSelect.value);
+                        });
+                    }
+                    
+                    // We'll use the global checkOpenAiApiStatus function from app.js instead
+                    
+                    // Generic function to handle API key saving
+                    const setupApiKeySaving = (provider) => {
+                        const saveBtn = popupContent.querySelector(`#save-${provider}-key`);
+                        if (saveBtn) {
+                            saveBtn.addEventListener('click', () => {
+                                const keyInput = document.getElementById(`${provider}-api-key`);
+                                if (keyInput && keyInput.value) {
+                                    // Save to localStorage
+                                    localStorage.setItem(`${provider}-api-key`, keyInput.value);
+                                    
+                                    // Show success message
+                                    saveBtn.textContent = 'API Key Saved!';
+                                    saveBtn.classList.add('success');
+                                    
+                                    // Reset after delay
+                                    setTimeout(() => {
+                                        saveBtn.textContent = `Update ${provider.charAt(0).toUpperCase() + provider.slice(1)} Key`;
+                                        saveBtn.classList.remove('success');
+                                        
+                                        // Check status with new key
+                                        window.checkOpenAiApiStatus();
+                                    }, 1500);
+                                }
+                            });
+                        }
+                        
+                        // Load key if exists
+                        const keyInput = document.getElementById(`${provider}-api-key`);
+                        if (keyInput) {
+                            const savedKey = localStorage.getItem(`${provider}-api-key`);
+                            if (savedKey) {
+                                // Mask the key for security
+                                keyInput.setAttribute('placeholder', '••••••••••••••••••••••••••••••••');
+                            }
+                        }
+                    };
+                    
+                    // Setup API key handlers for each provider
+                    setupApiKeySaving('openai');
+                    setupApiKeySaving('anthropic');
+                    setupApiKeySaving('perplexity');
+                    
+                    // Special handling for Hugging Face which has model selection
+                    const saveHuggingFaceBtn = popupContent.querySelector('#save-huggingface-key');
+                    if (saveHuggingFaceBtn) {
+                        saveHuggingFaceBtn.addEventListener('click', () => {
+                            const keyInput = document.getElementById('huggingface-api-key');
+                            const modelInput = document.getElementById('huggingface-model');
+                            
+                            if (keyInput && keyInput.value) {
+                                // Save API key to localStorage
+                                localStorage.setItem('huggingface-api-key', keyInput.value);
+                                
+                                // Save model to localStorage (if provided)
+                                if (modelInput) {
+                                    localStorage.setItem('huggingface-model', modelInput.value || '');
+                                }
+                                
+                                // Show success message
+                                saveHuggingFaceBtn.textContent = 'API Token Saved!';
+                                saveHuggingFaceBtn.classList.add('success');
+                                
+                                // Reset after delay
+                                setTimeout(() => {
+                                    saveHuggingFaceBtn.textContent = 'Update Hugging Face Token';
+                                    saveHuggingFaceBtn.classList.remove('success');
+                                    
+                                    // For now, just use the OpenAI status check
+                                    window.checkOpenAiApiStatus();
+                                }, 1500);
+                            }
+                        });
+                        
+                        // Load existing values
+                        const keyInput = document.getElementById('huggingface-api-key');
+                        const modelInput = document.getElementById('huggingface-model');
+                        
+                        if (keyInput) {
+                            const savedKey = localStorage.getItem('huggingface-api-key');
+                            if (savedKey) {
+                                keyInput.setAttribute('placeholder', '••••••••••••••••••••••••••••••••');
+                            }
+                        }
+                        
+                        if (modelInput) {
+                            const savedModel = localStorage.getItem('huggingface-model');
+                            if (savedModel) {
+                                modelInput.value = savedModel;
+                            }
+                        }
+                    }
+                    
+                    // We'll check the API status and initialize settings after all functions are defined
+                    // This will happen at the end of this script
+                    
+                    // Function was already defined earlier, so we'll remove this duplicate
+                    
+                    // Attach save event listener
+                    const saveBtn = popupContent.querySelector('#save-settings');
+                    if (saveBtn) {
+                        saveBtn.addEventListener('click', () => {
+                            // Collect settings
+                            const settings = {
+                                editor: {
+                                    fontSize: document.getElementById('editor-font-size').value,
+                                    tabSize: document.getElementById('editor-tab-size').value
+                                },
+                                interface: {
+                                    animations: document.getElementById('interface-animations').checked
+                                }
+                            };
+                            
+                            // Save to localStorage
+                            localStorage.setItem('code-meets-reality-settings', JSON.stringify(settings));
+                            
+                            // Apply settings to editor
+                            if (window.editor) {
+                                if (settings.editor.fontSize) {
+                                    const editorElement = document.querySelector('.CodeMirror');
+                                    if (editorElement) {
+                                        editorElement.style.fontSize = settings.editor.fontSize;
+                                    }
+                                }
+                                
+                                if (settings.editor.tabSize) {
+                                    window.editor.setOption('indentUnit', parseInt(settings.editor.tabSize));
+                                    window.editor.setOption('tabSize', parseInt(settings.editor.tabSize));
+                                }
+                            }
+                            
+                            // Apply interface settings
+                            if (settings.interface.animations === false) {
+                                // Disable animations
+                                const style = document.createElement('style');
+                                style.id = 'disable-animations';
+                                style.textContent = `
+                                    * {
+                                        animation-duration: 0s !important;
+                                        transition-duration: 0s !important;
+                                    }
+                                `;
+                                document.head.appendChild(style);
+                            } else {
+                                // Enable animations (remove style if it exists)
+                                const disableStyle = document.getElementById('disable-animations');
+                                if (disableStyle) {
+                                    disableStyle.remove();
+                                }
+                            }
+                            
+                            // Close the popup with success message
+                            popup.classList.add('success');
+                            popupContent.querySelector('.popup-body').innerHTML = `
+                                <div class="settings-success">
+                                    <i data-feather="check-circle"></i>
+                                    <p>Settings saved successfully!</p>
+                                </div>
+                            `;
+                            
+                            // Initialize feather icons
+                            if (window.feather) {
+                                feather.replace();
+                            }
+                            
+                            // Close popup after delay
+                            setTimeout(() => {
+                                popup.classList.remove('active');
+                                popup.classList.remove('success');
+                            }, 1500);
+                        });
+                    }
+                }
+            }
+        });
+    }
+    
+    // Add API status check function to window object so it's globally accessible
+    window.checkOpenAiApiStatus = function() {
+        // Find the API status elements
+        const statusIndicator = document.getElementById('openai-status-indicator');
+        const statusText = document.getElementById('openai-status-text');
+        
+        if (!statusIndicator || !statusText) return;
+        
+        try {
+            // Update UI to loading state
+            statusIndicator.className = 'status-indicator status-loading';
+            statusText.textContent = 'Checking API status...';
+            
+            // Send request to check API status (server-side key)
+            fetch('/api/check-openai-status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ api_key: null }) // null means use server-side key
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    statusIndicator.className = 'status-indicator status-success';
+                    statusText.textContent = 'Server API key connected';
+                } else {
+                    // If server key failed, try client key
+                    const clientKey = localStorage.getItem('openai-api-key');
+                    if (!clientKey) {
+                        statusIndicator.className = 'status-indicator status-warning';
+                        statusText.textContent = 'API key not set';
+                    } else {
+                        // Check with client key
+                        fetch('/api/check-openai-status', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ api_key: clientKey })
+                        })
+                        .then(clientResponse => clientResponse.json())
+                        .then(clientData => {
+                            if (clientData.status === 'ok') {
+                                statusIndicator.className = 'status-indicator status-success';
+                                statusText.textContent = 'Client API key connected';
+                            } else {
+                                statusIndicator.className = 'status-indicator status-error';
+                                statusText.textContent = clientData.message || 'API error: Check your key';
+                            }
+                        });
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error checking OpenAI API status:', error);
+                statusIndicator.className = 'status-indicator status-error';
+                statusText.textContent = 'Connection error';
+            });
+        } catch (error) {
+            console.error('Error in API status check:', error);
+            statusIndicator.className = 'status-indicator status-error';
+            statusText.textContent = 'Error checking status';
+        }
+    };
+    
+    // Add event listener for settings icon
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add save button event listener for OpenAI API key
+        document.body.addEventListener('click', function(event) {
+            if (event.target && event.target.id === 'save-openai-key') {
+                const keyInput = document.getElementById('openai-api-key');
+                if (keyInput && keyInput.value) {
+                    // Save to localStorage
+                    localStorage.setItem('openai-api-key', keyInput.value);
+                    
+                    // Show success message
+                    event.target.textContent = 'API Key Saved!';
+                    event.target.classList.add('success');
+                    
+                    // Reset after delay
+                    setTimeout(() => {
+                        event.target.textContent = 'Update OpenAI Key';
+                        event.target.classList.remove('success');
+                        
+                        // Check status with new key
+                        window.checkOpenAiApiStatus();
+                    }, 1500);
+                }
+            }
+            
+            // When settings panel opens, check API status
+            if (event.target && (event.target.classList.contains('sidebar-menu-item') || 
+                event.target.parentElement?.classList.contains('sidebar-menu-item'))) {
+                const item = event.target.classList.contains('sidebar-menu-item') ? 
+                    event.target : event.target.parentElement;
+                
+                if (item.classList.contains('settings-button')) {
+                    // Wait for DOM to update
+                    setTimeout(() => {
+                        window.checkOpenAiApiStatus();
+                    }, 500);
+                }
+            }
+        });
+        
+        // Initial check when the settings menu is opened
+        document.querySelectorAll('.settings-button').forEach(button => {
+            button.addEventListener('click', () => {
+                // Allow time for the popup to render
+                setTimeout(() => {
+                    window.checkOpenAiApiStatus();
+                }, 500);
+            });
+        });
+    });
+    
+    // Authentication Demo button event listener
+    const authDemoBtn = root.querySelector('#auth-example-btn');
+    if (authDemoBtn) {
+        authDemoBtn.addEventListener('click', async () => {
+            console.log("Authentication Demo button clicked");
+            
+            try {
+                // Try to dynamically import the auth example module
+                const authExampleModule = await import('/static/js/examples/auth_example.js');
+                if (typeof authExampleModule.loadAuthExample === 'function') {
+                    // Load the authentication example
+                    authExampleModule.loadAuthExample();
+                    
+                    // Activate the beginner code tab if it exists
+                    if (typeof activateBeginnerCodeTab === 'function') {
+                        activateBeginnerCodeTab();
+                    } else {
+                        // Find and click the beginner code tab as fallback
+                        const beginnerCodeTab = document.querySelector('[data-tab="beginner-code"]');
+                        if (beginnerCodeTab) {
+                            beginnerCodeTab.click();
+                        }
+                    }
+                } else {
+                    console.error("Auth example module found but loadAuthExample function not available");
+                }
+            } catch (error) {
+                console.error("Error loading auth example module:", error);
+                
+                // Fallback if dynamic import fails: try to use global function if available
+                if (typeof window.loadAuthExample === 'function') {
+                    window.loadAuthExample();
+                    
+                    // Activate the beginner code tab if it exists
+                    if (typeof activateBeginnerCodeTab === 'function') {
+                        activateBeginnerCodeTab();
+                    } else {
+                        // Find and click the beginner code tab as fallback
+                        const beginnerCodeTab = document.querySelector('[data-tab="beginner-code"]');
+                        if (beginnerCodeTab) {
+                            beginnerCodeTab.click();
+                        }
+                    }
+                } else {
+                    console.error("Both dynamic import and global function failed for auth example");
+                }
+            }
+        });
+    }
+}

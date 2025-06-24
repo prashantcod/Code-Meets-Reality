@@ -1,0 +1,53 @@
+export function Sidebar(root) {
+    root.innerHTML = `
+        <div class="sidebar-icon" id="reference-icon">
+            <img src="assets/icons/reference.svg" alt="Reference" width="28"/>
+            <span class="sidebar-tooltip">References</span>
+        </div>
+        <div id="sidebar-buttons" style="display:none; flex-direction:column; align-items:center;">
+            <div class="sidebar-icon" data-btn="if-else">
+                <img src="assets/icons/ifelse.svg" alt="If-Else" width="28"/>
+                <span class="sidebar-tooltip">If-Else</span>
+            </div>
+            <div class="sidebar-icon" data-btn="oops">
+                <img src="assets/icons/oops.svg" alt="OOPs" width="28"/>
+                <span class="sidebar-tooltip">OOPs</span>
+            </div>
+            <div class="sidebar-icon" data-btn="decorators">
+                <img src="assets/icons/decorators.svg" alt="Decorators" width="28"/>
+                <span class="sidebar-tooltip">Decorators</span>
+            </div>
+            <div class="sidebar-icon" data-btn="user-functions">
+                <img src="assets/icons/functions.svg" alt="User Functions" width="28"/>
+                <span class="sidebar-tooltip">User Functions</span>
+            </div>
+        </div>
+        <div class="sidebar-icon" id="history-icon">
+            <img src="assets/icons/history.svg" alt="History" width="28"/>
+            <span class="sidebar-tooltip">History</span>
+        </div>
+        <div class="sidebar-icon" id="settings-icon">
+            <img src="assets/icons/settings.svg" alt="Settings" width="28"/>
+            <span class="sidebar-tooltip">Settings</span>
+        </div>
+    `;
+
+    // Reference icon toggles sidebar buttons
+    root.querySelector('#reference-icon').onclick = () => {
+        const btns = root.querySelector('#sidebar-buttons');
+        btns.style.display = btns.style.display === 'none' ? 'flex' : 'none';
+    };
+
+    // Sidebar buttons open popup canvas with prompt
+    root.querySelectorAll('[data-btn]').forEach(btn => {
+        btn.onclick = () => {
+            window.dispatchEvent(new CustomEvent('open-popup', {
+                detail: { type: btn.getAttribute('data-btn') }
+            }));
+        };
+    });
+
+    // History and Settings icons (add your own logic)
+    root.querySelector('#history-icon').onclick = () => alert('History clicked!');
+    root.querySelector('#settings-icon').onclick = () => alert('Settings clicked!');
+}

@@ -1,0 +1,130 @@
+async function updateInteractiveDemo(code) {
+    // If our enhanced component function exists, use it
+    if (typeof window.updateInteractiveDemo === 'function' && window.updateInteractiveDemo !== updateInteractiveDemo) {
+        return window.updateInteractiveDemo(code);
+    } else {
+        try {
+            console.log("Generating interactive demo for code length:", code ? code.length : 0);
+            
+            // Get current language and concept
+            const language = document.getElementById('language-selector').value || 'python';
+            const concept = document.getElementById('concept-selector').value || 'general';
+            
+            // If no code is provided but we have a concept, try to load example code for that concept
+            if ((!code || code.length < 30) && concept !== 'general') {
+                try {
+                    // Dynamically import the concept examples
+                    console.log("Attempting to import ConceptExamples.js from updateInteractiveDemo");
+                    const module = await import('/static/js/components/ConceptExamples.js');
+                    // Get example code for the concept
+                    const exampleCode = module.getConceptExamples(concept, language);
+                    if (exampleCode) {
+                        code = exampleCode;
+                        console.log(`Used example code for ${concept} in ${language} for interactive demo`);
+                    }
+                } catch (e) {
+                    console.warn('Error loading concept examples for interactive demo:', e);
+                }
+            }
+            
+            // Detect if code is authentication-related for better demo selection
+            const isAuthRelated = code && (
+                code.toLowerCase().includes('login') || 
+                code.toLowerCase().includes('password') || 
+                code.toLowerCase().includes('authenticate') ||
+                code.toLowerCase().includes('credentials')
+            );
+            
+            console.log(`Code type detected: ${isAuthRelated ? 'Authentication-related' : 'Standard'}, Language: ${language}, Concept: ${concept}`);
+            
+            // Show loading indicator in the GUI demo section
+            const guiDemoRoot = document.getElementById('gui-demo-root');
+            if (guiDemoRoot) {
+                const guiDemoContent = guiDemoRoot.querySelector('.panel-content');
+                if (guiDemoContent) {
+                    guiDemoContent.innerHTML = `
+                        <div class="loading-spinner-container">
+                            <div class="loading-spinner"></div>
+                            <p>Generating interactive GUI demonstration...</p>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Get interactive demo from API
+            const response = await fetch('/api/realworld/demo', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    code,
+                    language,
+                    concept
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Failed to fetch interactive demo: ${response.status} ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            console.log("Received demo data with html length:", data.demo_html ? data.demo_html.length : 0);
+            
+            // Update the GUI Demo section in the right panel
+            if (guiDemoRoot) {
+                const guiDemoContent = guiDemoRoot.querySelector('.panel-content');
+                if (guiDemoContent) {
+                    if (data.demo_html) {
+                        guiDemoContent.innerHTML = data.demo_html;
+                        console.log("Updated GUI demo content");
+                        
+                        // Execute any scripts in the demo HTML
+                        executeScripts(guiDemoContent);
+                    } else {
+                        guiDemoContent.innerHTML = '<div class="empty-state">No GUI demo available for this code.</div>';
+                    }
+                }
+            }
+            
+            // Also update the popup interactive demo panel if it exists
+            const interactiveDemo = document.querySelector('.interactive-demo');
+            if (interactiveDemo) {
+                if (data.demo_html) {
+                    interactiveDemo.innerHTML = data.demo_html;
+                    
+                    // Execute any scripts in the demo HTML
+                    executeScripts(interactiveDemo);
+                } else {
+                    interactiveDemo.innerHTML = '<div class="empty-state">No interactive demo available for this code.</div>';
+                }
+            }
+            
+            // Also update the interactive demo container for the modal
+            const demoContainer = document.getElementById('interactive-demo-container');
+            if (demoContainer) {
+                const demoContent = demoContainer.querySelector('.panel-content');
+                if (demoContent && data.demo_html) {
+                    demoContent.innerHTML = data.demo_html;
+                    
+                    // Execute any scripts in the demo HTML
+                    executeScripts(demoContent);
+                }
+            }
+            
+            // Return the data for chaining
+            return data;
+        } catch (error) {
+            console.error('Error updating interactive demo:', error);
+            
+            // Set fallback content
+            const guiDemoRoot = document.getElementById('gui-demo-root');
+            if (guiDemoRoot) {
+                const guiDemoContent = guiDemoRoot.querySelector('.panel-content');
+                if (guiDemoContent) {
+                    guiDemoContent.innerHTML = '<div class="error-message">Could not load GUI demo.</div>';
+                }
+            }
+        }
+    }
+}
