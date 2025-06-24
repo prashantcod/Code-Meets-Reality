@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synquora - Interactive Coding Platform</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <!-- Google Fonts - Special font for Synquora name -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Feather Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <!-- Code highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/tokyo-night-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    
+    <!-- CodeMirror Library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldgutter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/selection/active-line.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top navigation (full width) -->
+        <div class="top-nav">
+            <div class="logo">
+                <img src="/static/img/logo.svg" alt="Coding Platform Logo" id="logo">
+                <span class="synquora-name">SYNQUORA</span>
+            </div>
+            <div class="nav-actions">
+                    <select id="language-selector">
+                        <option value="python">Python</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="java">Java</option>
+                    </select>
+                    <select id="concept-selector" class="hidden-selector">
+                        <option value="general">Choose Concept</option>
+                        <option value="if-else">If-Else Statements</option>
+                        <option value="loops">Loops</option>
+                        <option value="functions">Functions</option>
+                        <option value="oops">OOP</option>
+                        <option value="recursion">Recursion</option>
+                        <option value="data-structures">Data Structures</option>
+                    </select>
+                    <div class="auth-buttons">
+                        <button class="btn-auth btn-sign-in" id="sign-in-btn">
+                            <i data-feather="log-in"></i> Sign In
+                        </button>
+                        <button class="btn-auth btn-sign-up" id="sign-up-btn">
+                            <i data-feather="user-plus"></i> Sign Up
+                        </button>
+                    </div>
+                    <button class="btn-run" id="run-code">
+                        <i data-feather="play"></i> Run Code
+                    </button>
+                    <button class="btn-help" id="toggle-help">
+                        <i data-feather="help-circle"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Main content container with sidebar and workspace -->
+            <div class="main-content-container">
+                <!-- Sidebar -->
+                <div class="sidebar" id="sidebar-root"></div>
+                
+                <!-- Main workspace -->
+                <div class="workspace">
+                <!-- Left Panel: Code editor with tabs (full height) -->
+                <div class="panel code-panel fullheight-panel">
+                    <div class="panel-header with-tabs">
+                        <div class="panel-tabs">
+                            <div class="panel-tab active" data-tab="beginner-code">Beginner Code</div>
+                            <div class="panel-tab" data-tab="practice-problems">Practice Problems</div>
+                            <button id="analyze-complexity-btn" class="analyze-complexity-btn" title="AI-powered code complexity analysis">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" 
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bar-chart">
+                                    <line x1="12" y1="20" x2="12" y2="10"></line>
+                                    <line x1="18" y1="20" x2="18" y2="4"></line>
+                                    <line x1="6" y1="20" x2="6" y2="16"></line>
+                                </svg>
+                                <span>Analyze Complexity</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <!-- Tab content containers -->
+                        <div class="tab-content active" id="beginner-code-content">
+                            <div id="code-editor-root">
+                                <!-- Code editor will be injected here -->
+                            </div>
+                        </div>
+                        <div class="tab-content" id="practice-problems-content">
+                            <div id="practice-problems-list">
+                                <!-- Practice problems will be injected here -->
+                                <div class="loading-problems">Loading practice problems...</div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                
+                <!-- Right Panel: Real-world code with GUI demo button -->
+                <div class="panel realworld-panel fullheight-panel">
+                    <!-- Full height Real-world code examples -->
+                    <div class="realworld-section" id="realworld-code-root">
+                        <div class="panel-header">
+                            <h3>Real-World Code</h3>
+                            <button class="gui-demo-button" id="open-gui-demo">
+                                <i data-feather="play-circle"></i> GUI Demo
+                            </button>
+                        </div>
+                        <div class="panel-content">
+                            <!-- Real-world code will be injected here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Hidden GUI Demo section (for compatibility) -->
+                    <div class="gui-demo-section" id="gui-demo-root" style="display: none;">
+                        <div class="panel-content">
+                            <!-- GUI Demo will be injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Console output panel (initially hidden, slides up from bottom) -->
+            <div class="console-container" id="console-container">
+                <div class="console-handle">
+                    <div class="console-handle-indicator"></div>
+                </div>
+                <div class="panel console-panel" id="console-output-root">
+                    <div class="panel-header">
+                        <h3>Console Output</h3>
+                        <div class="panel-actions">
+                            <button class="btn-minimize" id="minimize-console">
+                                <i data-feather="chevron-down"></i>
+                            </button>
+                            <button class="btn-clear" id="clear-console">
+                                <i data-feather="trash-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <!-- Console output will be injected here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Interactive demo panel (overlaid on right panel when needed) -->
+            <div class="interactive-demo-container hidden" id="interactive-demo-container">
+                <div class="panel visual-panel" id="interactive-demo-root">
+                    <div class="panel-header">
+                        <h3>Interactive Demo</h3>
+                        <button class="btn-close" id="close-demo">
+                            <i data-feather="x"></i>
+                        </button>
+                    </div>
+                    <div class="panel-content">
+                        <!-- Interactive demo will be injected here -->
+                    </div>
+                </div>
+            </div>
+            </div>
+    </div>
+    
+    <!-- Popup Canvas (hidden by default) -->
+    <div id="popup-canvas-root"></div>
+    
+    <!-- AI Help Panel (hidden by default) -->
+    <div id="helpline-root"></div>
+    
+    <!-- Practice Area (hidden by default) -->
+    <div id="practice-area-root"></div>
+    
+    <!-- Complexity Analyzer (hidden by default) -->
+    <div class="complexity-analyzer-container" id="complexity-analyzer-container">
+        <div class="complexity-analyzer">
+            <div class="complexity-analyzer-header">
+                <h2>Code Complexity Analysis</h2>
+                <button class="complexity-analyzer-close" onclick="closeComplexityAnalysis()">&times;</button>
+            </div>
+            <div class="complexity-analyzer-body">
+                <!-- Content will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script src="/static/js/app.js" type="module"></script>
+    <script src="/static/js/concept-popup.js" type="module"></script>
+    <script src="/static/js/complexity-analyzer.js" type="module"></script>
+    <script type="module">
+        // Import the if_else_handler.js module functions
+        import { loadIfElseAuthDemo } from '/static/js/if_else_handler.js';
+        // Make the function available globally for other scripts
+        window.loadIfElseAuthDemo = loadIfElseAuthDemo;
+        
+        // Import auth example module
+        try {
+            import('/static/js/examples/auth_example.js')
+                .then(module => {
+                    // Make auth example function available globally
+                    window.loadAuthExample = module.loadAuthExample;
+                    console.log("Authentication example module loaded successfully");
+                })
+                .catch(error => {
+                    console.error("Error loading authentication example module:", error);
+                });
+        } catch (error) {
+            console.error("Error setting up authentication example import:", error);
+        }
+    </script>
+</body>
+</html>
