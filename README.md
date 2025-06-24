@@ -100,7 +100,7 @@ else:
 ##  Contact
 
 Want to contribute or give feedback? Reach out at:  
-prashantgyawali890.@gmail.com *(or your preferred email)*
+prashantgyawali890.@gmail.com 
 
 ---
 
