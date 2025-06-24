@@ -100,7 +100,7 @@ else:
 ##  Contact
 
 Want to contribute or give feedback? Reach out at:  
-prashantgyawali890.@gmail.com or praccticoding@gmail.com
+prashantgyawali890.@gmail.com or praccticoding@gmail.com or 
 prashantgyawali41@gmail.com
 
 ---
