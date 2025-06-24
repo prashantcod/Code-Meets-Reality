@@ -72,7 +72,7 @@ else:
 
 ---
 
-## 🔧 Tech Stack
+##  Tech Stack
 
 - **Frontend:** HTML, CSS, JavaScript
 - **Backend:** Python with FastAPI
